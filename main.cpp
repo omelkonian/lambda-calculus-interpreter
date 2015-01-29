@@ -31,7 +31,8 @@ int main() {
 //		tester->testScannerErrorsRT();
 //		tester->testScannerRT();
 //		tester->testParserRT();
-		tester->testParser();
+//		tester->testParser();
+		tester->testAST();
 		return 0;
 	}
 

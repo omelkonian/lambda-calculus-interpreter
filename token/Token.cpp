@@ -46,4 +46,5 @@ void Token::print() {
 	cout << "Type: " << typeToString(this->type) << endl;
 	this->value->print();
 	cout << "Position: " << this->position << endl;
+	cout << endl;
 }

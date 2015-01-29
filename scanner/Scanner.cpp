@@ -69,24 +69,24 @@ Token* Scanner::nextToken() {
 			// Left parenthesis
 		case '(':
 			this->readPosition++;
-			return new Token(LEFT_PAR, this->readPosition - 1, new TokenValue(0, NULL));
+			return new Token(LEFT_PAR, this->readPosition - 1, new TokenValue(NONE, NULL));
 			// Right parenthesis
 		case ')':
 			this->readPosition++;
-			return new Token(RIGHT_PAR, this->readPosition - 1, new TokenValue(0, NULL));
+			return new Token(RIGHT_PAR, this->readPosition - 1, new TokenValue(NONE, NULL));
 			// Backslash
 		case 92:
 			this->readPosition++;
-			return new Token(LAMBDA, this->readPosition - 1, new TokenValue(0, NULL));
+			return new Token(LAMBDA, this->readPosition - 1, new TokenValue(NONE, NULL));
 			// Dot
 		case '.':
 			this->readPosition++;
-			return new Token(LAMBDA_DOT, this->readPosition - 1, new TokenValue(0, NULL));
+			return new Token(LAMBDA_DOT, this->readPosition - 1, new TokenValue(NONE, NULL));
 		default:
 			// Operator
 			if (isValidOperator(cur) && (this->readPosition + 1 < maxReadPos) && !isValidDigit(this->command[this->readPosition + 1])) {
 				this->readPosition++;
-				return new Token(OPERATOR, this->readPosition - 1, new TokenValue(1, &cur));
+				return new Token(OPERATOR, this->readPosition - 1, new TokenValue(CHAR, &cur));
 			}
 			// Non-spaced operation
 			else if ((isValidOperator(cur) && (cur != '-') && (this->readPosition + 1 < maxReadPos) && isValidDigit(this->command[this->readPosition + 1])))
@@ -109,7 +109,7 @@ Token* Scanner::nextToken() {
 							ret = -atoi(number);
 						} else
 							ret = atoi(number);
-						return new Token(NUMBER, this->readPosition - 1, new TokenValue(2, &ret));
+						return new Token(NUMBER, this->readPosition - 1, new TokenValue(INTEGER, &ret));
 					}
 					else if (isValidVarSymbol(cur))
 						print_error(this->command, "ERROR: Invalid variable identifier - cannot start with a number", this->readPosition - numberLen);
@@ -132,7 +132,7 @@ Token* Scanner::nextToken() {
 						variableName[variableLen] = '\0';
 						char *variableRet = (char*) malloc(strlen((const char*) variableName));
 						strcpy(variableRet, (const char*) variableName);
-						return new Token(VARIABLE, this->readPosition - 1, new TokenValue(0, variableRet));
+						return new Token(VARIABLE, this->readPosition - 1, new TokenValue(STRING, variableRet));
 					} else
 						print_error(this->command, "ERROR: Invalid variable identifier", this->readPosition);
 				}

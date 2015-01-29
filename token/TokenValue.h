@@ -8,9 +8,16 @@
 #ifndef TOKEN_TOKENVALUE_H_
 #define TOKEN_TOKENVALUE_H_
 
+enum ValueType {
+	STRING,
+	CHAR,
+	INTEGER,
+	NONE
+};
+
 class TokenValue {
 public:
-	int type; //0: string, 1: char, 2: int
+	ValueType type;
 
 	union value_t {
 		char *string;
@@ -19,7 +26,7 @@ public:
 	} value;
 
 
-	TokenValue(int type, void *val);
+	TokenValue(ValueType type, void *val);
 	virtual ~TokenValue();
 
 	void print();

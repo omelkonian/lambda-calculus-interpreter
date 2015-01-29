@@ -12,7 +12,7 @@
 
 using namespace std;
 
-TokenValue::TokenValue(int type, void *val) {
+TokenValue::TokenValue(ValueType type, void *val) {
 	this->type = type;
 	switch (type) {
 	// String
@@ -26,6 +26,9 @@ TokenValue::TokenValue(int type, void *val) {
 	// Integer
 	case 2:
 		this->value.number = *(int*)val;
+		break;
+	// None
+	default:
 		break;
 	}
 }

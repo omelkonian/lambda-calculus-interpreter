@@ -9,6 +9,7 @@
 #define PARSER_PARSER_H_
 
 #include "../scanner/Scanner.h"
+#include "../abstract_syntax_tree/AST.h"
 
 /*
  * Recursive Descent Parser.
@@ -38,6 +39,8 @@ class Parser {
 	int savedTokens;
 	int curIndex;
 public:
+	AST *syntaxTree;
+
 	Parser(char *command);
 	virtual ~Parser();
 

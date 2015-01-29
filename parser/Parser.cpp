@@ -8,6 +8,8 @@
 #include "Parser.h"
 #include <malloc.h>
 #include <stdio.h>
+#include "../abstract_syntax_tree/InternalNode.h"
+#include "../abstract_syntax_tree/Leaf.h"
 
 #include <iostream>
 
@@ -16,6 +18,7 @@ using namespace std;
 int indent = 0;
 
 Parser::Parser(char *command) {
+	this->syntaxTree = new AST(new InternalNode(TERM));
 	this->scanner = new Scanner(command);
 	this->next = NULL;
 	this->savedTokens = 0;

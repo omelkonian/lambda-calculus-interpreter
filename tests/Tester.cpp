@@ -17,6 +17,9 @@
 
 #include "../parser/Parser.h"
 #include "../scanner/Scanner.h"
+#include "../abstract_syntax_tree/AST.h"
+#include "../abstract_syntax_tree/InternalNode.h"
+#include "../abstract_syntax_tree/Leaf.h"
 
 using namespace std;
 
@@ -138,4 +141,27 @@ void Tester::testParser() {
 	}
 
 	free(command);
+}
+
+void Tester::testAST() {
+	InternalNode *in = new InternalNode(TERM);
+		in->addChild(new Leaf(new Token(LEFT_PAR, 0, new TokenValue(NONE, NULL))));
+		InternalNode *in2 = new InternalNode(APPLICATION);
+			in2->addChild(new Leaf(new Token(LEFT_PAR, 0, new TokenValue(NONE, NULL))));
+			InternalNode *in3 = new InternalNode(TERM);
+				char var1[2] = "x";
+				in3->addChild(new Leaf(new Token(VARIABLE, 0, new TokenValue(NONE, var1))));
+			InternalNode *in4 = new InternalNode(TERM);
+				char var2[2] = "y";
+				in4->addChild(new Leaf(new Token(VARIABLE, 0, new TokenValue(STRING, var2))));
+			in2->addChild(in3);
+			in2->addChild(in4);
+			in2->addChild(new Leaf(new Token(RIGHT_PAR, 0, new TokenValue(NONE, NULL))));
+		in->addChild(in2);
+		in->addChild(new Leaf(new Token(RIGHT_PAR, 0, new TokenValue(NONE, NULL))));
+
+	AST *ast = new AST(in);
+	ast->print();
+
+
 }
