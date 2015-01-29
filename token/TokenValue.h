@@ -30,6 +30,7 @@ public:
 	virtual ~TokenValue();
 
 	void print();
+	void print(int indent);
 };
 
 #endif /* TOKEN_TOKENVALUE_H_ */

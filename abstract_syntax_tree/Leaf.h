@@ -20,7 +20,7 @@ public:
 	Leaf(Token *token);
 	virtual ~Leaf();
 
-	void print();
+	void print(int indent);
 };
 
 #endif /* ABSTRACT_SYNTAX_TREE_LEAF_H_ */

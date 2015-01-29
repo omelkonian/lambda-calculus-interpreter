@@ -30,7 +30,7 @@ public:
 
 	void addChild(Node *node);
 
-	void print();
+	void print(int indent);
 
 private:
 	const char* getTypeAsString();

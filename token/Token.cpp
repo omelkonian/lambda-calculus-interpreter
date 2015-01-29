@@ -48,3 +48,14 @@ void Token::print() {
 	cout << "Position: " << this->position << endl;
 	cout << endl;
 }
+
+void Token::print(int indent) {
+	for (int i = 0; i < indent; i++)
+		cout << " ";
+	if (this->type == VARIABLE || this->type == NUMBER || this->type == OPERATOR) {
+		cout << typeToString(this->type) << ":  ";
+		this->value->print(0);
+	}
+	else
+		cout << typeToString(this->type) << endl;
+}

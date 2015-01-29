@@ -19,15 +19,15 @@ TokenValue::TokenValue(ValueType type, void *val) {
 	case 0:
 		this->value.string = (char*) val;
 		break;
-	// Character
+		// Character
 	case 1:
-		this->value.character = *(char*)val;
+		this->value.character = *(char*) val;
 		break;
-	// Integer
+		// Integer
 	case 2:
-		this->value.number = *(int*)val;
+		this->value.number = *(int*) val;
 		break;
-	// None
+		// None
 	default:
 		break;
 	}
@@ -49,5 +49,18 @@ void TokenValue::print() {
 		cout << value.character << endl;
 	else
 		cout << value.number << endl;
+}
 
+void TokenValue::print(int indent) {
+	for (int i = 0; i < indent; i++)
+		cout << " ";
+	if (this->type == 0) {
+		if (this->value.string)
+			cout << value.string << endl;
+		else
+			cout << "NULL" << endl;
+	} else if (this->type == 1)
+		cout << value.character << endl;
+	else
+		cout << value.number << endl;
 }

@@ -16,7 +16,7 @@ public:
 	Node();
 	virtual ~Node();
 
-	virtual void print() {};
+	virtual void print(int indent) {};
 };
 
 #endif /* ABSTRACT_SYNTAX_TREE_NODE_H_ */

@@ -33,6 +33,7 @@ public:
 	virtual ~Token();
 
 	void print();
+	void print(int indent);
 };
 
 #endif /* LCI_SCANNER_TOKEN_H_ */

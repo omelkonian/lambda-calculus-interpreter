@@ -15,6 +15,6 @@ Leaf::~Leaf() {
 	delete this->token;
 }
 
-void Leaf::print() {
-	this->token->print();
+void Leaf::print(int indent) {
+	this->token->print(indent);
 }

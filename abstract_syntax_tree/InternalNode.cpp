@@ -12,12 +12,6 @@ using namespace std;
 
 InternalNode::InternalNode(NodeType type) {
 	this->type = type;
-//	if (type == 0)
-//		this->type = TERM;
-//	else if (type == 1)
-//		this->type = APPLICATION;
-//	else
-//		this->type = ABSTRACTION;
 }
 
 InternalNode::~InternalNode() {
@@ -30,10 +24,12 @@ void InternalNode::addChild(Node* node) {
 	this->children.push_back(node);
 }
 
-void InternalNode::print() {
-	cout << "Type: " << this->getTypeAsString() << endl;
+void InternalNode::print(int indent) {
+	for (int i = 0; i < indent; i++)
+		cout << " ";
+	cout << this->getTypeAsString() << endl;
 	for (int i = 0; i < (int) this->children.size(); i++)
-		this->children[i]->print();
+		this->children[i]->print(indent + 3);
 }
 
 const char* InternalNode::getTypeAsString() {

@@ -16,5 +16,5 @@ AST::~AST() {
 }
 
 void AST::print() {
-	this->root->print();
+	this->root->print(0);
 }

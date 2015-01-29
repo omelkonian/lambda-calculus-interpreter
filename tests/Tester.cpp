@@ -150,7 +150,7 @@ void Tester::testAST() {
 			in2->addChild(new Leaf(new Token(LEFT_PAR, 0, new TokenValue(NONE, NULL))));
 			InternalNode *in3 = new InternalNode(TERM);
 				char var1[2] = "x";
-				in3->addChild(new Leaf(new Token(VARIABLE, 0, new TokenValue(NONE, var1))));
+				in3->addChild(new Leaf(new Token(VARIABLE, 0, new TokenValue(STRING, var1))));
 			InternalNode *in4 = new InternalNode(TERM);
 				char var2[2] = "y";
 				in4->addChild(new Leaf(new Token(VARIABLE, 0, new TokenValue(STRING, var2))));
@@ -162,6 +162,4 @@ void Tester::testAST() {
 
 	AST *ast = new AST(in);
 	ast->print();
-
-
 }
