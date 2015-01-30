@@ -9,58 +9,63 @@
 #include <stdio.h>
 #include <iostream>
 #include <malloc.h>
+#include <string.h>
 
 using namespace std;
 
+TokenValue::TokenValue(TokenValue* copy) {
+	this->type = copy->type;
+	if (copy->type == STRING) {
+		this->value.string = (char*) malloc(strlen((const char*)copy->value.string));
+		strcpy(this->value.string, copy->value.string);
+	} else
+		this->value = copy->value;
+}
+
 TokenValue::TokenValue(ValueType type, void *val) {
-	this->type = type;
-	switch (type) {
-	// String
-	case 0:
-		this->value.string = (char*) val;
-		break;
-		// Character
-	case 1:
-		this->value.character = *(char*) val;
-		break;
-		// Integer
-	case 2:
-		this->value.number = *(int*) val;
-		break;
-		// None
-	default:
-		break;
-	}
+this->type = type;
+switch (type) {
+case STRING:
+	this->value.string = (char*) val;
+	break;
+case CHAR:
+	this->value.character = *(char*) val;
+	break;
+case INTEGER:
+	this->value.number = *(int*) val;
+	break;
+default:
+	break;
+}
 }
 
 TokenValue::~TokenValue() {
-	if (this->type == 0)
-		free(this->value.string);
+if (this->type == STRING)
+	free(this->value.string);
 }
 
 void TokenValue::print() {
-	cout << "Value: ";
-	if (this->type == 0) {
-		if (this->value.string)
-			cout << value.string << endl;
-		else
-			cout << "NULL" << endl;
-	} else if (this->type == 1)
-		cout << value.character << endl;
-	else
-		cout << value.number << endl;
+cout << "Value: ";
+if (this->type == STRING) {
+	cout << value.string << endl;
+} else if (this->type == CHAR)
+	cout << value.character << endl;
+else if (this->type == INTEGER)
+	cout << value.number << endl;
+else
+	cout << "None" << endl;
 }
 
 void TokenValue::print(int indent) {
-	for (int i = 0; i < indent; i++)
-		cout << " ";
-	if (this->type == 0) {
-		if (this->value.string)
-			cout << value.string << endl;
-		else
-			cout << "NULL" << endl;
-	} else if (this->type == 1)
-		cout << value.character << endl;
-	else
-		cout << value.number << endl;
+for (int i = 0; i < indent; i++)
+	cout << " ";
+if (this->type == STRING) {
+	cout << value.string << endl;
+} else if (this->type == CHAR)
+	cout << value.character << endl;
+else if (this->type == INTEGER)
+	cout << value.number << endl;
+else
+	cout << "None" << endl;
 }
+

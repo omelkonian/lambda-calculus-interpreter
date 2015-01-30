@@ -25,7 +25,7 @@ public:
 		int number;
 	} value;
 
-
+	TokenValue(TokenValue *copy);
 	TokenValue(ValueType type, void *val);
 	virtual ~TokenValue();
 

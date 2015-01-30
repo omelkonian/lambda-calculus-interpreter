@@ -20,6 +20,7 @@ public:
 	void testScannerErrorsRT();
 	void testScannerRT();
 	void testParserRT();
+	void testParserErrors();
 	void testParser();
 
 	void testAST();

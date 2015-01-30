@@ -9,7 +9,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <assert.h>
-#include <cstring>
+#include <string.h>
 #include <malloc.h>
 
 #include <readline/readline.h>
@@ -51,7 +51,7 @@ void Tester::testScannerErrorsRT() {
 }
 
 void Tester::testScannerRT() {
-	cout << "___________Testing Scanner___________" << endl;
+	cout << "___________Testing Scanner Real-Time___________" << endl;
 
 	while (true) {
 		char * command = readline("> ");
@@ -77,7 +77,7 @@ void Tester::testScannerRT() {
 }
 
 void Tester::testParserRT() {
-	cout << "___________Testing Parser___________" << endl;
+	cout << "___________Testing Parser Real-Time___________" << endl;
 
 	while (true) {
 		char * command = readline("> ");
@@ -96,6 +96,9 @@ void Tester::testParserRT() {
 
 		cout << "Syntax is " << (parser->parse() ? "correct." : "wrong.") << endl;
 
+		parser->syntaxTree->print();
+
+		delete parser;
 		free(command);
 	}
 
@@ -162,4 +165,50 @@ void Tester::testAST() {
 
 	AST *ast = new AST(in);
 	ast->print();
+}
+
+void Tester::testParserErrors() {
+	cout << "___________Testing Parser Error Checking___________" << endl;
+
+	const int commands = 24;
+	const int maxCommandLen = 100;
+
+	char **command = (char**) malloc(commands * sizeof(char*));
+	for (int i = 0; i < commands; i++)
+		command[i] = (char*) malloc(maxCommandLen);
+
+	strcpy(command[0], "((\\x. x) ())");
+	strcpy(command[1], "((\\x. x) (.))");
+	strcpy(command[2], "((\\x. x) (+))");
+	strcpy(command[3], "((\\x. x) (\\()))");
+	strcpy(command[4], "((\\x. x) (\\))");
+	strcpy(command[5], "((\\x. x) (\\ \\))");
+	strcpy(command[6], "((\\x. x) (\\ .))");
+	strcpy(command[7], "((\\x. x) (\\ %))");
+	strcpy(command[8], "((\\x. x) (\\ 15692))");
+	strcpy(command[9], "((\\x. x) (y \\))");
+	strcpy(command[10], "((\\x. x) (y *))");
+	strcpy(command[11], "((\\x. x) (1 +))");
+	strcpy(command[12], "((\\x. x) (1 + \\))");
+	strcpy(command[13], "((\\x. x) (1 + .))");
+	strcpy(command[14], "((\\x. x) (1 + y))");
+	strcpy(command[15], "((\\x. x) (1 + *))");
+	strcpy(command[16], "((\\x. x) (\y. *))");
+	strcpy(command[17], "((\\x. x) (\y.))");
+	strcpy(command[18], "((\\x. x) (\y. \\))");
+	strcpy(command[19], "((\\x. x) (\y..))");
+	strcpy(command[20], "((\\x. x) (25 \\))");
+	strcpy(command[21], "((\\x. x) (25 .))");
+	strcpy(command[22], "((\\x. x) (x y)\\)");
+	strcpy(command[23], "((\\x. x) (x).)");
+
+	Parser *parsers[commands];
+
+	for (int i = 0; i < commands; i++) {
+		cout << "> " << command[i] << endl;
+		parsers[i] = new Parser(command[i]);
+		assert(!parsers[i]->parse());
+	}
+
+	free(command);
 }

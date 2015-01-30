@@ -23,6 +23,8 @@ public:
 	Scanner(char *command);
 	virtual ~Scanner();
 
+	char* getCommand();
+
 	Token* nextToken();
 };
 

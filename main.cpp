@@ -6,16 +6,17 @@
  */
 
 #include <iostream>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include <curses.h>
-#include <term.h>
+//#include <curses.h>
+//#include <term.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#include "error_handler/error_handling.h"
 #include "defines.h"
 #include "parser/Parser.h"
 #include "tests/Tester.h"
@@ -30,9 +31,10 @@ int main() {
 		Tester *tester = new Tester();
 //		tester->testScannerErrorsRT();
 //		tester->testScannerRT();
-//		tester->testParserRT();
+		tester->testParserRT();
 //		tester->testParser();
-		tester->testAST();
+//		tester->testAST();
+//		tester->testParserErrors();
 		return 0;
 	}
 

@@ -7,28 +7,46 @@
 
 #include "Token.h"
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
-const char* typeToString(TokenType type) {
+// Syntactic sugar for vector initialization.
+template <class T> class vector_inserter{
+public:
+    std::vector<T>& v;
+    vector_inserter(std::vector<T>& v):v(v){}
+    vector_inserter& operator,(const T& val){v.push_back(val);return *this;}
+};
+template <class T> vector_inserter<T>& operator+=(std::vector<T>& v,const T& x){
+    return vector_inserter<T>(v),x;
+}
+
+const char* Token::typeToString(TokenType type) {
 	switch (type) {
 	case 0:
-		return "LAMBDA";
+		return "\\";
 	case 1:
-		return "LAMBDA_DOT";
+		return ".";
 	case 2:
-		return "LEFT_PAR";
+		return "(";
 	case 3:
-		return "RIGHT_PAR";
+		return ")";
 	case 4:
-		return "VARIABLE";
+		return "variable";
 	case 5:
-		return "NUMBER";
+		return "number";
 	case 6:
-		return "OPERATOR";
+		return "operator";
 	default:
 		return "UNKNOWN";
 	}
+}
+
+Token::Token(Token* copy) {
+	this->type = copy->type;
+	this->position = copy->position;
+	this->value = new TokenValue(copy->value);
 }
 
 Token::Token(TokenType type, int position, TokenValue *value) {
@@ -47,6 +65,43 @@ void Token::print() {
 	this->value->print();
 	cout << "Position: " << this->position << endl;
 	cout << endl;
+}
+
+bool Token::canBeFollowedBy(TokenType type) {
+	std::vector<TokenType> validTypes;
+	switch (this->type) {
+		case LAMBDA:
+			validTypes += VARIABLE;
+			break;
+		case LAMBDA_DOT:
+			validTypes += VARIABLE, NUMBER, LEFT_PAR;
+			break;
+		case LEFT_PAR:
+			validTypes += LEFT_PAR, NUMBER, LAMBDA, VARIABLE;
+			break;
+		case RIGHT_PAR:
+			validTypes += OPERATOR, RIGHT_PAR, VARIABLE, LEFT_PAR, NUMBER;
+			break;
+		case VARIABLE:
+			validTypes += VARIABLE, LEFT_PAR, RIGHT_PAR, NUMBER, LAMBDA_DOT;
+			break;
+		case NUMBER:
+			validTypes += VARIABLE, OPERATOR, LEFT_PAR, RIGHT_PAR, NUMBER;
+			break;
+		case OPERATOR:
+			validTypes += NUMBER, LEFT_PAR;
+			break;
+	}
+	bool found = false;
+	for (int i = 0; i < (int)validTypes.size(); i++) {
+		if (validTypes[i] == type)
+			found = true;
+	}
+	return found;
+}
+
+int Token::getPosition() {
+	return this->position;
 }
 
 void Token::print(int indent) {

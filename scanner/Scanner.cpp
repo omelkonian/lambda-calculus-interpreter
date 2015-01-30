@@ -9,8 +9,9 @@
 #include "../defines.h"
 #include "../error_handler/error_handling.h"
 
-#include <cstring>
-#include <cstdlib>
+#include <string.h>
+#include <stdlib.h>
+#include <stdlib.h>
 #include <malloc.h>
 #include <iostream>
 
@@ -39,7 +40,7 @@ Scanner::Scanner(char *command) {
 }
 
 Scanner::~Scanner() {
-	free(this->command);
+//	free(this->command); // is freed by caller
 }
 
 Token* Scanner::nextToken() {
@@ -58,7 +59,7 @@ Token* Scanner::nextToken() {
 		if ((!firstSymbolRead) && (cur != 32)) {
 			firstSymbolRead = true;
 			if (cur != '(')
-				print_error(this->command, "ERROR: Left parenthesis missing", this->readPosition - 1);
+				print_error("ERROR: Left parenthesis missing", this->readPosition - 1);
 		}
 
 		switch (cur) {
@@ -90,7 +91,7 @@ Token* Scanner::nextToken() {
 			}
 			// Non-spaced operation
 			else if ((isValidOperator(cur) && (cur != '-') && (this->readPosition + 1 < maxReadPos) && isValidDigit(this->command[this->readPosition + 1])))
-				print_error(this->command, "ERROR: Space required between arithmetic operations", this->readPosition);
+				print_error("ERROR: Space required between arithmetic operations", this->readPosition);
 			// Digit
 			else if (isValidDigit(cur) || ((cur == '-') && (this->readPosition + 1 < maxReadPos) && isValidDigit(this->command[this->readPosition + 1]))) {
 				number[numberLen++] = cur;
@@ -112,11 +113,11 @@ Token* Scanner::nextToken() {
 						return new Token(NUMBER, this->readPosition - 1, new TokenValue(INTEGER, &ret));
 					}
 					else if (isValidVarSymbol(cur))
-						print_error(this->command, "ERROR: Invalid variable identifier - cannot start with a number", this->readPosition - numberLen);
+						print_error("ERROR: Invalid variable identifier - cannot start with a number", this->readPosition - numberLen);
 					else
-						print_error(this->command, "ERROR: Invalid number [0-9]", this->readPosition);
+						print_error("ERROR: Invalid number [0-9]", this->readPosition);
 				}
-				print_error(this->command, "ERROR: Right parenthesis missing", this->readPosition);
+				print_error("ERROR: Right parenthesis missing", this->readPosition);
 			}
 			// Variable
 			else if (isValidVarSymbol(cur)) {
@@ -134,14 +135,18 @@ Token* Scanner::nextToken() {
 						strcpy(variableRet, (const char*) variableName);
 						return new Token(VARIABLE, this->readPosition - 1, new TokenValue(STRING, variableRet));
 					} else
-						print_error(this->command, "ERROR: Invalid variable identifier", this->readPosition);
+						print_error("ERROR: Invalid variable identifier", this->readPosition);
 				}
-				print_error(this->command, "ERROR: Right parenthesis missing", this->readPosition);
+				print_error("ERROR: Right parenthesis missing", this->readPosition);
 			}
 			// Invalid Symbol
 			else
-				print_error(this->command, "ERROR: Unknown symbol", this->readPosition);
+				print_error("ERROR: Unknown symbol", this->readPosition);
 		}
 	}
 	return NULL;
+}
+
+char* Scanner::getCommand() {
+	return this->command;
 }

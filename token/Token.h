@@ -11,8 +11,6 @@
 #include <string>
 #include "TokenValue.h"
 
-using namespace std;
-
 enum TokenType {
 	LAMBDA,
 	LAMBDA_DOT,
@@ -29,8 +27,15 @@ class Token {
 public:
 	TokenType type;
 
+	Token(Token *copy);
 	Token(TokenType type, int position, TokenValue *value);
 	virtual ~Token();
+
+	int getPosition();
+
+	bool canBeFollowedBy(TokenType type);
+
+	const char* typeToString(TokenType type);
 
 	void print();
 	void print(int indent);

@@ -10,6 +10,8 @@
 
 #include "../scanner/Scanner.h"
 #include "../abstract_syntax_tree/AST.h"
+#include "../abstract_syntax_tree/InternalNode.h"
+#include "../abstract_syntax_tree/Leaf.h"
 
 /*
  * Recursive Descent Parser.
@@ -38,6 +40,7 @@ class Parser {
 	Token **next;
 	int savedTokens;
 	int curIndex;
+
 public:
 	AST *syntaxTree;
 
@@ -47,28 +50,28 @@ public:
 	bool parse();
 
 private:
-	bool terminal(TokenType type);
+	bool terminal(TokenType type, InternalNode *node);
 
-	bool Term();
-	bool Term_1();
-	bool Term_2();
-	bool Term_3();
+	bool Term(InternalNode *node);
+	bool Term_1(InternalNode *node);
+	bool Term_2(InternalNode *node);
+	bool Term_3(InternalNode *node);
 
-	bool Number();
-	bool Number_1();
-	bool Number_2();
+	bool Number(InternalNode *node);
+	bool Number_1(InternalNode *node);
+	bool Number_2(InternalNode *node);
 
-	bool X();
-	bool X_1();
-	bool X_2();
+	bool X(InternalNode *node);
+	bool X_1(InternalNode *node);
+	bool X_2(InternalNode *node);
 
-	bool Y();
-	bool Y_1();
-	bool Y_2();
+	bool Y(InternalNode *node);
+	bool Y_1(InternalNode *node);
+	bool Y_2(InternalNode *node);
 
-	bool Z();
-	bool Z_1();
-	bool Z_2();
+	bool Z(InternalNode *node);
+	bool Z_1(InternalNode *node);
+	bool Z_2(InternalNode *node);
 };
 
 #endif /* PARSER_PARSER_H_ */

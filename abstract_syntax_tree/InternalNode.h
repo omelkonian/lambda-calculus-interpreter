@@ -14,7 +14,8 @@
 enum NodeType {
 	TERM,
 	APPLICATION,
-	ABSTRACTION
+	ABSTRACTION,
+	NUMBER_EXP
 };
 
 /**

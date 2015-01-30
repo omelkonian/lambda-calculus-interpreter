@@ -37,6 +37,8 @@ const char* InternalNode::getTypeAsString() {
 		return "TERM";
 	else if (type == 1)
 		return "APPLICATION";
-	else
+	else if (type == 2)
 		return "ABSTRACTION";
+	else
+		return "NUMBER_EXP";
 }
