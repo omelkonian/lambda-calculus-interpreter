@@ -96,7 +96,8 @@ void Tester::testParserRT() {
 
 		cout << "Syntax is " << (parser->parse() ? "correct." : "wrong.") << endl;
 
-		parser->syntaxTree->print();
+		parser->postProcess();
+		parser->printSyntaxTree();
 
 		delete parser;
 		free(command);
@@ -209,6 +210,21 @@ void Tester::testParserErrors() {
 		parsers[i] = new Parser(command[i]);
 		assert(!parsers[i]->parse());
 	}
+
+	free(command);
+}
+
+void Tester::testCalculator() {
+	cout << "___________Testing Calculator___________" << endl;
+
+	char *command = (char*) malloc(50);
+
+	strcpy(command, "(1 * (1 + ((100) / (10 % 100))");
+
+	Parser *parser = new Parser(command);
+	assert(parser->parse());
+	parser->postProcess();
+
 
 	free(command);
 }

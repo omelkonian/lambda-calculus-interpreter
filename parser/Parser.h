@@ -49,6 +49,10 @@ public:
 
 	bool parse();
 
+	void postProcess();
+
+	void printSyntaxTree();
+
 private:
 	bool terminal(TokenType type, InternalNode *node);
 

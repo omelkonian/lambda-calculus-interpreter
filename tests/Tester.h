@@ -22,8 +22,8 @@ public:
 	void testParserRT();
 	void testParserErrors();
 	void testParser();
-
 	void testAST();
+	void testCalculator();
 };
 
 #endif /* TESTS_TESTER_H_ */

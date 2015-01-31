@@ -61,6 +61,7 @@ bool Parser::terminal(TokenType type, InternalNode *node) {
 	bool ret = (next[curIndex++]->type == type) ? true : false;
 	if (ret)
 		node->addChild(new Leaf(new Token(next[curIndex - 1])));
+
 	// Error checking.
 	if (curIndex == this->savedTokens && next[curIndex - 1]->type != RIGHT_PAR)
 		print_error1("ERROR: Right parenthesis missing", next[curIndex]->getPosition());
@@ -157,6 +158,15 @@ bool Parser::Z_1(InternalNode *node) {
 	return terminal(RIGHT_PAR, node);
 }
 
+void Parser::printSyntaxTree() {
+	this->syntaxTree->print();
+}
+
 bool Parser::Z_2(InternalNode *node) {
 	return terminal(OPERATOR, node) && Number(node) && terminal(RIGHT_PAR, node);
+}
+
+void Parser::postProcess() {
+	this->syntaxTree->refine();
+	this->syntaxTree->doCalculations();
 }

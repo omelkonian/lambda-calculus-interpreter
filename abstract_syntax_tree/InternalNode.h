@@ -12,9 +12,10 @@
 #include <vector>
 
 enum NodeType {
-	TERM,
+	TERM, // Used for parser, specified later.
 	APPLICATION,
 	ABSTRACTION,
+	VARIABLE_ID,
 	NUMBER_EXP
 };
 
@@ -30,6 +31,9 @@ public:
 	virtual ~InternalNode();
 
 	void addChild(Node *node);
+
+	// Returns a number, after doing all required numeric operations recursively.
+	int doCalculations();
 
 	void print(int indent);
 

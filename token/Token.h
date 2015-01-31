@@ -23,8 +23,8 @@ enum TokenType {
 
 class Token {
 	int position;
-	TokenValue *value;
 public:
+	TokenValue *value;
 	TokenType type;
 
 	Token(Token *copy);

@@ -16,7 +16,19 @@ public:
 	AST(Node *root);
 	virtual ~AST();
 
+	// Differentiates abstractions from applications.
+	void refine();
+
+	// Calculates all NUMBER_EXP inside the tree.
+	void doCalculations();
+
+	Node* getRoot();
+
 	void print();
+
+private:
+	void refine1(Node *node);
+	void doCalculations1(Node *node);
 };
 
 #endif /* ABSTRACT_SYNTAX_TREE_AST_H_ */

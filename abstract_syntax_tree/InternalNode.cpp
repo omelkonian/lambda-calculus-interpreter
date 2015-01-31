@@ -6,7 +6,9 @@
  */
 
 #include "InternalNode.h"
+#include "Leaf.h"
 #include <iostream>
+#include <assert.h>
 
 using namespace std;
 
@@ -33,12 +35,53 @@ void InternalNode::print(int indent) {
 }
 
 const char* InternalNode::getTypeAsString() {
-	if (type == 0)
+	if (type == TERM)
 		return "TERM";
-	else if (type == 1)
+	else if (type == APPLICATION)
 		return "APPLICATION";
-	else if (type == 2)
+	else if (type == ABSTRACTION)
 		return "ABSTRACTION";
-	else
+	else if (type == VARIABLE_ID)
+		return "VARIABLE_ID";
+	else if (type == NUMBER_EXP)
 		return "NUMBER_EXP";
+	else
+		return "UNKNOWN";
+}
+
+int InternalNode::doCalculations() {
+	assert(this->type == NUMBER_EXP);
+
+	if (this->children.size() == 1) {
+		if (dynamic_cast<InternalNode*>(this->children[0]) != 0)
+			return ((InternalNode*)this->children[0])->doCalculations();
+		return ((Leaf*) this->children[0])->token->value->value.number;
+	}
+	else if (this->children.size() == 3)
+		return ((InternalNode*) this->children[1])->doCalculations();
+	else {
+		int operand1 = ((InternalNode*) this->children[1])->doCalculations();
+		int operand2 = ((InternalNode*) this->children[3])->doCalculations();
+		char oper = ((Leaf*) this->children[2])->token->value->value.character;
+
+		int result;
+		switch (oper) {
+		case '+':
+			result = operand1 + operand2;
+			break;
+		case '-':
+			result = operand1 - operand2;
+			break;
+		case '*':
+			result = operand1 * operand2;
+			break;
+		case '/':
+			result = operand1 / operand2;
+			break;
+		case '%':
+			result = operand1 % operand2;
+			break;
+		}
+		return result;
+	}
 }
