@@ -20,6 +20,8 @@
 #include "../abstract_syntax_tree/AST.h"
 #include "../abstract_syntax_tree/InternalNode.h"
 #include "../abstract_syntax_tree/Leaf.h"
+#include "../defines.h"
+#include "../error_handler/AutoCorrector.h"
 
 using namespace std;
 
@@ -229,4 +231,28 @@ void Tester::testCalculator() {
 
 
 	free(command);
+}
+
+void Tester::testAutocorrector() {
+	cout << "___________Testing AutoCorrector Real-Time___________" << endl;
+
+		while (true) {
+			char * command = readline("> ");
+			if (!command)
+				break;
+			if (strlen(command) == 0)
+				continue;
+			if (*command)
+				add_history(command);
+			if (strcmp(command, "quit") == 0) {
+				free(command);
+				break;
+			}
+
+			AutoCorrector *ac = new AutoCorrector(command);
+			command = ac->autoCorrect();
+			cout << endl;
+			cout << "Final: " << command << endl;
+		}
+
 }

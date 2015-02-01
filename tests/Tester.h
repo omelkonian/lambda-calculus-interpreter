@@ -24,6 +24,7 @@ public:
 	void testParser();
 	void testAST();
 	void testCalculator();
+	void testAutocorrector();
 };
 
 #endif /* TESTS_TESTER_H_ */

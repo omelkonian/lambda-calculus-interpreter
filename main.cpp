@@ -35,6 +35,7 @@ int main() {
 //		tester->testParser();
 //		tester->testAST();
 //		tester->testParserErrors();
+//		tester->testAutocorrector();
 		return 0;
 	}
 
