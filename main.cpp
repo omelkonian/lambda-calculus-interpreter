@@ -24,7 +24,7 @@
 using namespace std;
 
 int main() {
-
+	// ((\x. (\y. x)) (\z. z))
 	bool runTest = true;
 
 	if (runTest) {

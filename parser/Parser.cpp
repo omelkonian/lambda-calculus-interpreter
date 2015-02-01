@@ -169,4 +169,5 @@ bool Parser::Z_2(InternalNode *node) {
 void Parser::postProcess() {
 	this->syntaxTree->refine();
 	this->syntaxTree->doCalculations();
+	this->syntaxTree->simplify();
 }

@@ -99,6 +99,8 @@ void Tester::testParserRT() {
 		parser->postProcess();
 		parser->printSyntaxTree();
 
+		cout << "Command: " << parser->syntaxTree->toCommand() << endl;
+
 		delete parser;
 		free(command);
 	}

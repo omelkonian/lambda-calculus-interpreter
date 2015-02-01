@@ -37,7 +37,6 @@ public:
 
 	void print(int indent);
 
-private:
 	const char* getTypeAsString();
 };
 
