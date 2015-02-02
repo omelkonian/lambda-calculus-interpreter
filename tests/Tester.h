@@ -25,6 +25,8 @@ public:
 	void testAST();
 	void testCalculator();
 	void testAutocorrector();
+	void testEvaluatorRT();
+	void testVariablePool();
 };
 
 #endif /* TESTS_TESTER_H_ */

@@ -15,4 +15,3 @@ Node::Node() {
 Node::~Node() {
 	// TODO Auto-generated destructor stub
 }
-

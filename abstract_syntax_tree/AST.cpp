@@ -13,12 +13,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
+
 #include <iostream>
 
 using namespace std;
 
 AST::AST(Node *root) {
 	this->root = root;
+	this->parent = NULL;
+	this->varPool = new VariablePool();
 }
 
 AST::~AST() {
@@ -27,6 +31,10 @@ AST::~AST() {
 
 Node* AST::getRoot() {
 	return this->root;
+}
+
+void AST::setRoot(Node* root) {
+	this->root = root;
 }
 
 void AST::print() {
@@ -141,5 +149,200 @@ void AST::simplify1(Node* node) {
 		}
 		for (int i = 0; i < (int) cur->children.size(); i++)
 			this->simplify1(cur->children[i]);
+	}
+}
+
+bool AST::bReductionExists() {
+	bool found = false;
+	this->bReductionExists1(this->root, &found);
+	return found;
+}
+
+void AST::bReductionExists1(Node* node, bool* found) {
+	if (dynamic_cast<InternalNode*>(node) != 0) {
+		InternalNode *cur = (InternalNode*) node;
+		if (cur->type == APPLICATION) {
+			if (dynamic_cast<InternalNode*>(cur->children[1]) && ((InternalNode*) cur->children[1])->type == ABSTRACTION) {
+				*found = true;
+				return;
+			}
+		}
+
+		for (int i = 0; i < (int) cur->children.size(); i++)
+			this->bReductionExists1(cur->children[i], found);
+	}
+}
+
+InternalNode* AST::substitute(InternalNode *node) {
+	assert(node->type == APPLICATION);
+
+	InternalNode *toInsert = (InternalNode*) node->children[2];
+	InternalNode *insertTo = ((InternalNode*) node->children[1]);
+
+	this->substitute1((InternalNode*) insertTo->children[2], toInsert, ((Leaf*) insertTo->children[1])->token->value->value.string);
+
+
+	node->children[2] = NULL;
+	InternalNode *abstraction = (InternalNode*) node->children[1];
+	InternalNode *toCopy = (InternalNode*) abstraction->children[2];
+	InternalNode *newNode = toCopy->getNewByCopy();
+
+	return newNode;
+}
+
+void AST::substitute1(InternalNode *node, InternalNode *toInsert, char *varToSub) {
+	if (node->type == VARIABLE_ID && (strcmp(((Leaf*) node->children[0])->token->value->value.string, varToSub) == 0)) {
+		// TODO free memory
+		node->type = toInsert->type;
+		node->children = toInsert->children;
+	} else if (node->type == APPLICATION) {
+		this->substitute1(((InternalNode*) node->children[1]), toInsert, varToSub);
+		this->substitute1(((InternalNode*) node->children[2]), toInsert, varToSub);
+	} else if (node->type == ABSTRACTION) {
+		char *mainVar = ((Leaf*) node->children[1])->token->value->value.string;
+
+		// #1. (\x. P)[x := N] -> \x.P
+		if (strcmp(mainVar, varToSub) == 0) {
+			toInsert = (InternalNode*) node->children[2];
+			return;
+		} else {
+			char *x = varToSub;
+			char *y = mainVar;
+
+			std::vector<char*> fv_N = this->freeVariables(toInsert);
+			std::vector<char*> fv_P = this->freeVariables((InternalNode*) node->children[2]);
+
+			bool yInFV_N = false;
+			bool xInFV_P = false;
+
+			for (int i = 0; i < (int) fv_N.size(); i++) {
+				if (strcmp(fv_N[i], y) == 0)
+					yInFV_N = true;
+			}
+			for (int i = 0; i < (int) fv_P.size(); i++) {
+				if (strcmp(fv_P[i], x) == 0)
+					xInFV_P = true;
+			}
+
+			// #2 (\y. P)[x := N] -> \y. P[x := N]
+			if (!xInFV_P || !yInFV_N) {
+				this->substitute1((InternalNode*) node->children[2], toInsert, varToSub);
+			}
+			// #3 (\y. P)[x := N] -> \z. P[y := z][x := N]
+			else {
+				this->alpha_convert(node);
+				this->substitute1((InternalNode*) node->children[2], toInsert, varToSub);
+			}
+		}
+	}
+}
+
+InternalNode* AST::getFirstApplication() {
+	InternalNode *found = NULL;
+	this->getFirstApplication1(this->root, &found);
+	return found;
+}
+
+void AST::getFirstApplication1(Node* node, InternalNode **found) {
+	if (dynamic_cast<InternalNode*>(node)) {
+		InternalNode *cur = ((InternalNode*) node);
+		if (cur->type == APPLICATION)
+			*found = cur;
+		else {
+			for (int i = 0; i < (int) cur->children.size(); i++) {
+				if (*found)
+					break;
+				this->getFirstApplication1(cur->children[i], found);
+			}
+		}
+		return;
+	}
+}
+
+InternalNode* AST::getFirstApplicationParent() {
+	this->parent = NULL;
+	this->getFirstApplicationParent1(this->root);
+	return this->parent;
+}
+
+void AST::getFirstApplicationParent1(Node* node) {
+	if (dynamic_cast<InternalNode*>(node)) {
+		InternalNode *cur = ((InternalNode*) node);
+		if (cur->type == APPLICATION)
+			this->parent = cur;
+		else {
+			for (int i = 0; i < (int) cur->children.size(); i++) {
+				if (this->parent) {
+					this->parent = cur;
+					break;
+				}
+				this->getFirstApplicationParent1(cur->children[i]);
+			}
+		}
+		return;
+	}
+}
+
+std::vector<char*> AST::freeVariables(InternalNode* node) {
+	if (node->type == VARIABLE_ID) {
+		char *var = ((Leaf*) ((InternalNode*) node)->children[0])->token->value->value.string;
+		std::vector<char*> freeVars;
+		freeVars.push_back(var);
+		return freeVars;
+	} else if (node->type == APPLICATION) {
+		std::vector<char*> fv1 = this->freeVariables((InternalNode*) (node->children[1]));
+		std::vector<char*> fv2 = this->freeVariables((InternalNode*) (node->children[2]));
+		fv1.insert(fv1.end(), fv2.begin(), fv2.end());
+		return fv1;
+	} else if (node->type == ABSTRACTION) {
+		char *bindingVar = ((Leaf*) node->children[1])->token->value->value.string;
+		cout << "Binding var: " << bindingVar << endl;
+		std::vector<char*> freeVars = this->freeVariables((InternalNode*) (node->children[2]));
+		for (int i = 0; i < (int) freeVars.size(); i++) {
+			if (strcmp(freeVars[i], bindingVar) == 0) {
+				freeVars.erase(freeVars.begin() + i);
+				i--;
+			}
+		}
+		return freeVars;
+	} else {
+		cout << "INVALID NODE_TYPE" << endl;
+		exit(-1);
+	}
+}
+
+void AST::alpha_convert(InternalNode* abstraction) {
+	assert(abstraction->type == ABSTRACTION);
+
+	char *toReplace = ((Leaf*) ((InternalNode*) abstraction->children[1])->children[0])->token->value->value.string;
+	char *save = (char*) malloc(strlen(toReplace));
+	strcpy(save, toReplace);
+	free(toReplace);
+
+	char *replacement = this->varPool->generateVariable();
+	((Leaf*) ((InternalNode*) abstraction->children[1])->children[0])->token->value->value.string = replacement;
+
+	this->alpha_convert1(abstraction->children[2], save, replacement);
+}
+
+void AST::alpha_convert1(Node* node, char* varName, char* replacement) {
+	if (dynamic_cast<InternalNode*>(node)) {
+		InternalNode *cur = (InternalNode*) node;
+		if (cur->type == VARIABLE_ID) {
+			char *toReplace = ((Leaf*) cur->children[0])->token->value->value.string;
+			if (strcmp(toReplace, varName) == 0) {
+				free(toReplace);
+				char *newVar = (char*) malloc(strlen(replacement));
+				strcpy(newVar, replacement);
+				((Leaf*) cur->children[0])->token->value->value.string = newVar;
+			}
+		} else if (cur->type == ABSTRACTION) {
+			char *bindedVar = ((Leaf*) cur->children[1])->token->value->value.string;
+			assert(strcmp(bindedVar, varName));
+			this->alpha_convert1(cur->children[2], varName, replacement);
+		} else if (cur->type == APPLICATION) {
+			this->alpha_convert1(cur->children[1], varName, replacement);
+			this->alpha_convert1(cur->children[2], varName, replacement);
+		}
 	}
 }

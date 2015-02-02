@@ -25,17 +25,21 @@ using namespace std;
 
 int main() {
 	// ((\x. (\y. x)) (\z. z))
+	// ((\x. x) (\y. y))
+	// ((\x. x) ((\y. y) (\z. z)))
 	bool runTest = true;
 
 	if (runTest) {
 		Tester *tester = new Tester();
 //		tester->testScannerErrorsRT();
 //		tester->testScannerRT();
-		tester->testParserRT();
+//		tester->testParserRT();
 //		tester->testParser();
 //		tester->testAST();
 //		tester->testParserErrors();
 //		tester->testAutocorrector();
+		tester->testEvaluatorRT();
+//		tester->testVariablePool();
 		return 0;
 	}
 

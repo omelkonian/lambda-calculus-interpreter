@@ -28,6 +28,7 @@ public:
 	std::vector<Node*> children;
 
 	InternalNode(NodeType type);
+	InternalNode* getNewByCopy();
 	virtual ~InternalNode();
 
 	void addChild(Node *node);
@@ -38,6 +39,9 @@ public:
 	void print(int indent);
 
 	const char* getTypeAsString();
+
+private:
+	void copy(Node *node, InternalNode **toInsert);
 };
 
 #endif /* ABSTRACT_SYNTAX_TREE_INTERNALNODE_H_ */

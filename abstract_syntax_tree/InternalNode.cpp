@@ -7,13 +7,24 @@
 
 #include "InternalNode.h"
 #include "Leaf.h"
-#include <iostream>
+#include "../token/Token.h"
+#include "../token/TokenValue.h"
 #include <assert.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include <iostream>
 
 using namespace std;
 
 InternalNode::InternalNode(NodeType type) {
 	this->type = type;
+}
+
+InternalNode* InternalNode::getNewByCopy() {
+	InternalNode *ret = NULL;
+	this->copy(this, &ret);
+	return ret;
 }
 
 InternalNode::~InternalNode() {
@@ -54,10 +65,9 @@ int InternalNode::doCalculations() {
 
 	if (this->children.size() == 1) {
 		if (dynamic_cast<InternalNode*>(this->children[0]) != 0)
-			return ((InternalNode*)this->children[0])->doCalculations();
+			return ((InternalNode*) this->children[0])->doCalculations();
 		return ((Leaf*) this->children[0])->token->value->value.number;
-	}
-	else if (this->children.size() == 3)
+	} else if (this->children.size() == 3)
 		return ((InternalNode*) this->children[1])->doCalculations();
 	else {
 		int operand1 = ((InternalNode*) this->children[1])->doCalculations();
@@ -83,5 +93,44 @@ int InternalNode::doCalculations() {
 			break;
 		}
 		return result;
+	}
+}
+
+void InternalNode::copy(Node* node, InternalNode **toInsert) {
+	if (dynamic_cast<InternalNode*>(node)) {
+		InternalNode *copy = (InternalNode*) node;
+
+		char leftPar = '(';
+		char rightPar = ')';
+
+		InternalNode *newNode = new InternalNode(copy->type);
+		if (copy->type == VARIABLE_ID) {
+			char *varName = ((Leaf*) copy->children[0])->token->value->value.string;
+			char *newVarName = (char*) malloc(strlen(varName));
+			strcpy(newVarName, varName);
+			newNode->children.push_back(new Leaf(new Token(VARIABLE, 0, new TokenValue(STRING, newVarName))));
+		} else if (copy->type == NUMBER_EXP) {
+			int num = ((Leaf*) copy->children[0])->token->value->value.number;
+			newNode->children.push_back(new Leaf(new Token(NUMBER, 0, new TokenValue(INTEGER, &num))));
+		} else if (copy->type == ABSTRACTION) {
+			newNode->children.push_back(new Leaf(new Token(LEFT_PAR, 0, new TokenValue(CHAR, &leftPar))));
+			InternalNode *n2 = NULL;
+			char *varName = ((Leaf*) copy->children[1])->token->value->value.string;
+			char *newVarName = (char*) malloc(strlen(varName));
+			strcpy(newVarName, varName);
+			newNode->children.push_back(new Leaf(new Token(VARIABLE, 0, new TokenValue(STRING, newVarName))));
+			this->copy(copy->children[2], &n2);
+			newNode->children.push_back(n2);
+			newNode->children.push_back(new Leaf(new Token(RIGHT_PAR, 0, new TokenValue(CHAR, &rightPar))));
+		} else if (copy->type == APPLICATION) {
+			newNode->children.push_back(new Leaf(new Token(LEFT_PAR, 0, new TokenValue(CHAR, &leftPar))));
+			InternalNode *n1 = NULL, *n2 = NULL;
+			this->copy(copy->children[1], &n1);
+			this->copy(copy->children[2], &n2);
+			newNode->children.push_back(n1);
+			newNode->children.push_back(n2);
+			newNode->children.push_back(new Leaf(new Token(RIGHT_PAR, 0, new TokenValue(CHAR, &rightPar))));
+		}
+		*toInsert = newNode;
 	}
 }

@@ -22,6 +22,8 @@
 #include "../abstract_syntax_tree/Leaf.h"
 #include "../defines.h"
 #include "../error_handler/AutoCorrector.h"
+#include "../evaluator/Evaluator.h"
+#include "../abstract_syntax_tree/VariablePool.h"
 
 using namespace std;
 
@@ -255,4 +257,47 @@ void Tester::testAutocorrector() {
 			cout << "Final: " << command << endl;
 		}
 
+}
+
+void Tester::testEvaluatorRT() {
+	cout << "___________Testing Evaluator Real-Time___________" << endl;
+
+	while (true) {
+		char * command = readline("> ");
+		if (!command)
+			break;
+		if (strlen(command) == 0)
+			continue;
+		if (*command)
+			add_history(command);
+		if (strcmp(command, "quit") == 0) {
+			free(command);
+			break;
+		}
+
+		AutoCorrector *ac = new AutoCorrector(command);
+		command = ac->autoCorrect();
+
+		Parser *parser = new Parser(command);
+		parser->parse();
+		parser->postProcess();
+
+		Evaluator *eval = new Evaluator(parser->syntaxTree);
+		char *finalCommand = eval->evaluate();
+
+		free(command);
+	}
+}
+
+void Tester::testVariablePool() {
+	cout << "___________Testing Variable Pool___________" << endl;
+
+	VariablePool *varPool = new VariablePool();
+	cout << varPool->generateVariable() << endl;
+	cout << varPool->generateVariable() << endl;
+	cout << varPool->generateVariable() << endl;
+	cout << varPool->generateVariable() << endl;
+	cout << varPool->generateVariable() << endl;
+	cout << varPool->generateVariable() << endl;
+	cout << varPool->generateVariable() << endl;
 }
