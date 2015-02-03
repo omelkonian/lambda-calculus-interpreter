@@ -18,17 +18,17 @@
 using namespace std;
 
 // Utility functions.
-bool isValidVarSymbol(char symbol) {
+bool Scanner::isValidVarSymbol(char symbol) {
 	// Valid Symbols: a-z, A-Z, _
 	return (((symbol >= 65) && (symbol <= 90)) || ((symbol >= 97) && (symbol <= 122)) || (symbol == 95)) ? true : false;
 }
 
-bool isValidDigit(char symbol) {
+bool Scanner::isValidDigit(char symbol) {
 	// Valid digits: 0-9
 	return ((symbol >= 48) && (symbol <= 57)) ? true : false;
 }
 
-bool isValidOperator(char symbol) {
+bool Scanner::isValidOperator(char symbol) {
 	// Valid operators: +, -, *, %, /
 	return ((symbol == 37) || (symbol == 42) || (symbol == 43) || (symbol == 45) || (symbol == 47)) ? true : false;
 }

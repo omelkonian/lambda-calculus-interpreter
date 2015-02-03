@@ -58,6 +58,9 @@ bool Parser::parse() {
 }
 
 bool Parser::terminal(TokenType type, InternalNode *node) {
+	if (curIndex  >= this->savedTokens)
+		return false;
+
 	bool ret = (next[curIndex++]->type == type) ? true : false;
 	if (ret)
 		node->addChild(new Leaf(new Token(next[curIndex - 1])));
@@ -133,7 +136,14 @@ bool Parser::X_1(InternalNode *node) {
 }
 
 bool Parser::X_2(InternalNode *node) {
-	return terminal(LAMBDA, node) && terminal(VARIABLE, node) && terminal(LAMBDA_DOT, node) && Term(node) && terminal(RIGHT_PAR, node);
+	bool ret = terminal(LAMBDA, node) && terminal(VARIABLE, node) && terminal(LAMBDA_DOT, node) && Term(node);
+	if (ret) {
+
+		if (bool t = terminal(RIGHT_PAR, node))
+ 			return true;
+		else
+			print_error1("ERROR: ) missing.", this->curIndex + 1);
+	}
 }
 
 bool Parser::Y(InternalNode *node) {

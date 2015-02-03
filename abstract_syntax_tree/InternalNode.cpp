@@ -30,6 +30,7 @@ InternalNode* InternalNode::getNewByCopy() {
 InternalNode::~InternalNode() {
 	for (int i = 0; i < (int) this->children.size(); i++)
 		delete this->children[i];
+
 	this->children.clear();
 }
 

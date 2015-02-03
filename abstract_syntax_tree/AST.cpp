@@ -37,6 +37,28 @@ void AST::setRoot(Node* root) {
 	this->root = root;
 }
 
+InternalNode* AST::getParent(Node* child) {
+	InternalNode *parent = NULL;
+	this->getParent1(this->root, child, &parent);
+	return parent;
+}
+
+void AST::getParent1(Node *cur, Node* child, InternalNode** parent) {
+	if (dynamic_cast<InternalNode*>(cur)) {
+		InternalNode *curr = (InternalNode*) cur;
+		for (int i = 0; i < (int) curr->children.size(); i++) {
+			if (curr->children[i] == child) {
+				*parent = curr;
+				return;
+			}
+		}
+		for (int i = 0; i < (int) curr->children.size(); i++) {
+			if (*parent) break;
+			this->getParent1(curr->children[i], child, parent);
+		}
+	}
+}
+
 void AST::print() {
 	this->root->print(0);
 }
@@ -99,9 +121,20 @@ void AST::refine1(Node* node) {
 				cur->type = APPLICATION;
 			else if (cur->children.size() == 6)
 				cur->type = ABSTRACTION;
-			else if (cur->children.size() == 1) {
-				if (dynamic_cast<Leaf*>(cur->children[0]) && (((Leaf*) cur->children[0])->token->type == VARIABLE))
-					cur->type = VARIABLE_ID;
+			else if (cur->children.size() == 1 && dynamic_cast<Leaf*>(cur->children[0]) && (((Leaf*) cur->children[0])->token->type == VARIABLE))
+				cur->type = VARIABLE_ID;
+			else if (cur->children.size() == 3 && dynamic_cast<InternalNode*>(cur->children[1])
+					&& (((Leaf*) ((InternalNode*) cur->children[1])->children[0])->token->type == VARIABLE)) {
+				cur->type = VARIABLE_ID;
+				char *varName = ((Leaf*) ((InternalNode*) cur->children[1])->children[0])->token->value->value.string;
+				char *newVarName = (char*) malloc(strlen(varName));
+				strcpy(newVarName, varName);
+
+				for (int i = 0; i < (int) cur->children.size(); i++)
+					delete cur->children[i];
+				cur->children.clear();
+
+				cur->children.push_back(new Leaf(new Token(VARIABLE, 0, new TokenValue(STRING, newVarName))));
 			} else
 				cur->type = NUMBER_EXP;
 		}
@@ -161,15 +194,45 @@ bool AST::bReductionExists() {
 void AST::bReductionExists1(Node* node, bool* found) {
 	if (dynamic_cast<InternalNode*>(node) != 0) {
 		InternalNode *cur = (InternalNode*) node;
-		if (cur->type == APPLICATION) {
-			if (dynamic_cast<InternalNode*>(cur->children[1]) && ((InternalNode*) cur->children[1])->type == ABSTRACTION) {
-				*found = true;
-				return;
-			}
+		if (cur->type == APPLICATION && ((InternalNode*) cur->children[1])->type == ABSTRACTION) {
+			*found = true;
+			return;
 		}
 
 		for (int i = 0; i < (int) cur->children.size(); i++)
 			this->bReductionExists1(cur->children[i], found);
+	}
+}
+
+bool AST::etaConversionExists() {
+	bool found = false;
+	this->etaConversionExists1(this->root, &found);
+	return found;
+}
+
+void AST::etaConversionExists1(Node* node, bool* found) {
+	if (dynamic_cast<InternalNode*>(node) != 0) {
+		InternalNode *cur = (InternalNode*) node;
+		if (cur->type == ABSTRACTION && ((InternalNode*)cur->children[2])->type == APPLICATION) {
+			char *mainVar = ((Leaf*)cur->children[1])->token->value->value.string;
+			InternalNode *application = (InternalNode*) cur->children[2];
+			InternalNode *secondChild = (InternalNode*) application->children[2];
+			if (secondChild->type == VARIABLE_ID && strcmp((((Leaf*)secondChild->children[0])->token->value->value.string), mainVar) == 0) {
+				bool unbound = true;
+				std::vector<char*> freeVariables = this->freeVariables((InternalNode*)application->children[1]);
+				for (int i = 0; i < (int)freeVariables.size(); i++) {
+					if (strcmp(freeVariables[i], mainVar) == 0)
+						unbound = false;
+				}
+				if (unbound) {
+					*found = true;
+					return;
+				}
+			}
+		}
+
+		for (int i = 0; i < (int) cur->children.size(); i++)
+			this->etaConversionExists1(cur->children[i], found);
 	}
 }
 
@@ -181,18 +244,25 @@ InternalNode* AST::substitute(InternalNode *node) {
 
 	this->substitute1((InternalNode*) insertTo->children[2], toInsert, ((Leaf*) insertTo->children[1])->token->value->value.string);
 
-
-	node->children[2] = NULL;
 	InternalNode *abstraction = (InternalNode*) node->children[1];
 	InternalNode *toCopy = (InternalNode*) abstraction->children[2];
 	InternalNode *newNode = toCopy->getNewByCopy();
+
+	delete node->children[2];
+	delete ((InternalNode*) node->children[1])->children[0];
+	delete ((InternalNode*) node->children[1])->children[1];
+	delete ((InternalNode*) node->children[1])->children[3];
+
+	node->children.erase(node->children.begin() + 2);
+	node->children.erase(node->children.begin() + 1);
 
 	return newNode;
 }
 
 void AST::substitute1(InternalNode *node, InternalNode *toInsert, char *varToSub) {
 	if (node->type == VARIABLE_ID && (strcmp(((Leaf*) node->children[0])->token->value->value.string, varToSub) == 0)) {
-		// TODO free memory
+		for (int i = 0; i < (int) node->children.size(); i++)
+			delete node->children[i];
 		node->type = toInsert->type;
 		node->children = toInsert->children;
 	} else if (node->type == APPLICATION) {
@@ -225,9 +295,8 @@ void AST::substitute1(InternalNode *node, InternalNode *toInsert, char *varToSub
 			}
 
 			// #2 (\y. P)[x := N] -> \y. P[x := N]
-			if (!xInFV_P || !yInFV_N) {
+			if (!xInFV_P || !yInFV_N)
 				this->substitute1((InternalNode*) node->children[2], toInsert, varToSub);
-			}
 			// #3 (\y. P)[x := N] -> \z. P[y := z][x := N]
 			else {
 				this->alpha_convert(node);
@@ -236,6 +305,26 @@ void AST::substitute1(InternalNode *node, InternalNode *toInsert, char *varToSub
 		}
 	}
 }
+
+void AST::eta_convert(InternalNode* application) {
+	InternalNode *parent = this->getParent(application);
+	InternalNode *applicationChild = (InternalNode*) application->children[2];
+	InternalNode *newNode = ((InternalNode*)applicationChild->children[1])->getNewByCopy();
+	if (parent) {
+		for (int i = 0; i < (int)parent->children.size(); i++) {
+			if (parent->children[i] == application) {
+				delete parent->children[i];
+				parent->children[i] = newNode;
+			}
+		}
+	}
+	else {
+		// Delete root.
+		delete this->root;
+		this->root = newNode;
+	}
+}
+
 
 InternalNode* AST::getFirstApplication() {
 	InternalNode *found = NULL;
@@ -246,7 +335,7 @@ InternalNode* AST::getFirstApplication() {
 void AST::getFirstApplication1(Node* node, InternalNode **found) {
 	if (dynamic_cast<InternalNode*>(node)) {
 		InternalNode *cur = ((InternalNode*) node);
-		if (cur->type == APPLICATION)
+		if (cur->type == APPLICATION && ((InternalNode*) cur->children[1])->type == ABSTRACTION)
 			*found = cur;
 		else {
 			for (int i = 0; i < (int) cur->children.size(); i++) {
@@ -259,27 +348,35 @@ void AST::getFirstApplication1(Node* node, InternalNode **found) {
 	}
 }
 
-InternalNode* AST::getFirstApplicationParent() {
-	this->parent = NULL;
-	this->getFirstApplicationParent1(this->root);
-	return this->parent;
+InternalNode* AST::getEtaNode() {
+	InternalNode *found = NULL;
+	this->getEtaNode1(this->root, &found);
+	return found;
 }
 
-void AST::getFirstApplicationParent1(Node* node) {
-	if (dynamic_cast<InternalNode*>(node)) {
-		InternalNode *cur = ((InternalNode*) node);
-		if (cur->type == APPLICATION)
-			this->parent = cur;
-		else {
-			for (int i = 0; i < (int) cur->children.size(); i++) {
-				if (this->parent) {
-					this->parent = cur;
-					break;
+void AST::getEtaNode1(Node* node, InternalNode** found) {
+	if (dynamic_cast<InternalNode*>(node) != 0) {
+		InternalNode *cur = (InternalNode*) node;
+		if (cur->type == ABSTRACTION && ((InternalNode*)cur->children[2])->type == APPLICATION) {
+			char *mainVar = ((Leaf*)cur->children[1])->token->value->value.string;
+			InternalNode *application = (InternalNode*) cur->children[2];
+			InternalNode *secondChild = (InternalNode*) application->children[2];
+			if (secondChild->type == VARIABLE_ID && strcmp((((Leaf*)secondChild->children[0])->token->value->value.string), mainVar) == 0) {
+				bool unbound = true;
+				std::vector<char*> freeVariables = this->freeVariables((InternalNode*)application->children[1]);
+				for (int i = 0; i < (int)freeVariables.size(); i++) {
+					if (strcmp(freeVariables[i], mainVar) == 0)
+						unbound = false;
 				}
-				this->getFirstApplicationParent1(cur->children[i]);
+				if (unbound) {
+					*found = cur;
+					return;
+				}
 			}
 		}
-		return;
+
+		for (int i = 0; i < (int) cur->children.size(); i++)
+			this->getEtaNode1(cur->children[i], found);
 	}
 }
 
@@ -314,13 +411,14 @@ std::vector<char*> AST::freeVariables(InternalNode* node) {
 void AST::alpha_convert(InternalNode* abstraction) {
 	assert(abstraction->type == ABSTRACTION);
 
-	char *toReplace = ((Leaf*) ((InternalNode*) abstraction->children[1])->children[0])->token->value->value.string;
+	char *toReplace = ((Leaf*) abstraction->children[1])->token->value->value.string;
 	char *save = (char*) malloc(strlen(toReplace));
 	strcpy(save, toReplace);
 	free(toReplace);
 
 	char *replacement = this->varPool->generateVariable();
-	((Leaf*) ((InternalNode*) abstraction->children[1])->children[0])->token->value->value.string = replacement;
+
+	((Leaf*) abstraction->children[1])->token->value->value.string = replacement;
 
 	this->alpha_convert1(abstraction->children[2], save, replacement);
 }

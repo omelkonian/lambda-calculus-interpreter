@@ -9,24 +9,39 @@
 #define TESTS_TESTER_H_
 
 /**
- * Class for testing separate modules of the interpreter.
- * RT:= Real Time
+ * 	Class for testing separate modules of the interpreter.
+ * 	RT:= Real Time
  */
 class Tester {
 public:
 	Tester();
 	virtual ~Tester();
 
-	void testScannerErrorsRT();
+	// SCANNER
 	void testScannerRT();
+
+	// PARSER
 	void testParserRT();
-	void testParserErrors();
 	void testParser();
-	void testAST();
+
+	// CALCULATOR
 	void testCalculator();
-	void testAutocorrector();
+
+	// EVALUATOR
 	void testEvaluatorRT();
+	void testEvaluator();
+
+	// ERROR-CHECKING
+	void testScannerErrorsRT();
+	void testParserErrors();
+	void testAutocorrectorRT();
+
+	// INTERNAL TREE OPERATIONS
+	void testAST();
 	void testVariablePool();
+
+
+	void globalTest();
 };
 
 #endif /* TESTS_TESTER_H_ */

@@ -31,23 +31,29 @@ public:
 	// Returns the lambda-term this tree represents as string.
 	char* toCommand();
 
-	// Checks if there is some beta-reduction in the tree.
+	// Checks if there is a beta-reduction/eta-conversion in the tree.
 	bool bReductionExists();
+	bool etaConversionExists();
 
 	// Takes an application that has a b-redex and executes it.
 	InternalNode* substitute(InternalNode *node);
 
-	// Returns the free variables of a term.
-	std::vector<char*> freeVariables(InternalNode *node);
+	// Executes an eta-conversion on given node.
+	void eta_convert(InternalNode *application);
 
 	// Renames the binded variable of an abstraction to a newly generated variable name.
 	void alpha_convert(InternalNode *abstraction);
 
+	// Returns the free variables of a term.
+	std::vector<char*> freeVariables(InternalNode *node);
+
 	InternalNode* getFirstApplication();
-	InternalNode* getFirstApplicationParent();
+	InternalNode* getEtaNode();
 
 	Node* getRoot();
 	void setRoot(Node *root);
+
+	InternalNode* getParent(Node *child);
 
 	void print();
 
@@ -57,12 +63,19 @@ private:
 	void refine1(Node *node);
 	void doCalculations1(Node *node);
 	void simplify1(Node *node);
-	void toCommand1(Node *node, int *writePos, char *command);
+
 	void bReductionExists1(Node *node, bool *found);
+	void etaConversionExists1(Node *node, bool *found);
+
 	void substitute1(InternalNode *node, InternalNode *toInsert, char *varToSub);
-	void getFirstApplication1(Node *node, InternalNode **found);
-	void getFirstApplicationParent1(Node *node);
+	void eta_convert1(Node *node, char *varName, char *replacement);
 	void alpha_convert1(Node *node, char *varName, char *replacement);
+
+	void getFirstApplication1(Node *node, InternalNode **found);
+	void getEtaNode1(Node *node, InternalNode **found);
+
+	void getParent1(Node *cur, Node *child, InternalNode **parent);
+	void toCommand1(Node *node, int *writePos, char *command);
 };
 
 #endif /* ABSTRACT_SYNTAX_TREE_AST_H_ */

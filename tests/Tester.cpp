@@ -27,9 +27,11 @@
 
 using namespace std;
 
-Tester::Tester() {}
+Tester::Tester() {
+}
 
-Tester::~Tester() {}
+Tester::~Tester() {
+}
 
 void Tester::testScannerErrorsRT() {
 	cout << "___________Testing Scanner Error Checking___________" << endl;
@@ -74,8 +76,6 @@ void Tester::testScannerRT() {
 		while (Token *token = scanner->nextToken())
 			token->print();
 
-
-
 		free(command);
 	}
 }
@@ -112,6 +112,7 @@ void Tester::testParserRT() {
 }
 
 void Tester::testParser() {
+	// Must comment out exit(-1) in print_error.
 	cout << "___________Testing Parser___________" << endl;
 
 	const int commands = 11;
@@ -142,7 +143,7 @@ void Tester::testParser() {
 		results[i] = parsers[i]->parse();
 	}
 
-	bool actualResults[commands] = {true, true, true, false, false, true, true, true, true, false, true};
+	bool actualResults[commands] = { true, true, true, false, false, true, true, true, true, false, true };
 
 	for (int i = 0; i < commands; i++) {
 		assert(results[i] == actualResults[i]);
@@ -155,26 +156,27 @@ void Tester::testParser() {
 
 void Tester::testAST() {
 	InternalNode *in = new InternalNode(TERM);
-		in->addChild(new Leaf(new Token(LEFT_PAR, 0, new TokenValue(NONE, NULL))));
-		InternalNode *in2 = new InternalNode(APPLICATION);
-			in2->addChild(new Leaf(new Token(LEFT_PAR, 0, new TokenValue(NONE, NULL))));
-			InternalNode *in3 = new InternalNode(TERM);
-				char var1[2] = "x";
-				in3->addChild(new Leaf(new Token(VARIABLE, 0, new TokenValue(STRING, var1))));
-			InternalNode *in4 = new InternalNode(TERM);
-				char var2[2] = "y";
-				in4->addChild(new Leaf(new Token(VARIABLE, 0, new TokenValue(STRING, var2))));
-			in2->addChild(in3);
-			in2->addChild(in4);
-			in2->addChild(new Leaf(new Token(RIGHT_PAR, 0, new TokenValue(NONE, NULL))));
-		in->addChild(in2);
-		in->addChild(new Leaf(new Token(RIGHT_PAR, 0, new TokenValue(NONE, NULL))));
+	in->addChild(new Leaf(new Token(LEFT_PAR, 0, new TokenValue(NONE, NULL))));
+	InternalNode *in2 = new InternalNode(APPLICATION);
+	in2->addChild(new Leaf(new Token(LEFT_PAR, 0, new TokenValue(NONE, NULL))));
+	InternalNode *in3 = new InternalNode(TERM);
+	char var1[2] = "x";
+	in3->addChild(new Leaf(new Token(VARIABLE, 0, new TokenValue(STRING, var1))));
+	InternalNode *in4 = new InternalNode(TERM);
+	char var2[2] = "y";
+	in4->addChild(new Leaf(new Token(VARIABLE, 0, new TokenValue(STRING, var2))));
+	in2->addChild(in3);
+	in2->addChild(in4);
+	in2->addChild(new Leaf(new Token(RIGHT_PAR, 0, new TokenValue(NONE, NULL))));
+	in->addChild(in2);
+	in->addChild(new Leaf(new Token(RIGHT_PAR, 0, new TokenValue(NONE, NULL))));
 
 	AST *ast = new AST(in);
 	ast->print();
 }
 
 void Tester::testParserErrors() {
+	// Must comment out exit(-1) in print_error.
 	cout << "___________Testing Parser Error Checking___________" << endl;
 
 	const int commands = 24;
@@ -200,10 +202,10 @@ void Tester::testParserErrors() {
 	strcpy(command[13], "((\\x. x) (1 + .))");
 	strcpy(command[14], "((\\x. x) (1 + y))");
 	strcpy(command[15], "((\\x. x) (1 + *))");
-	strcpy(command[16], "((\\x. x) (\y. *))");
-	strcpy(command[17], "((\\x. x) (\y.))");
-	strcpy(command[18], "((\\x. x) (\y. \\))");
-	strcpy(command[19], "((\\x. x) (\y..))");
+	strcpy(command[16], "((\\x. x) (\\y. *))");
+	strcpy(command[17], "((\\x. x) (\\y.))");
+	strcpy(command[18], "((\\x. x) (\\y. \\))");
+	strcpy(command[19], "((\\x. x) (\\y..))");
 	strcpy(command[20], "((\\x. x) (25 \\))");
 	strcpy(command[21], "((\\x. x) (25 .))");
 	strcpy(command[22], "((\\x. x) (x y)\\)");
@@ -223,39 +225,44 @@ void Tester::testParserErrors() {
 void Tester::testCalculator() {
 	cout << "___________Testing Calculator___________" << endl;
 
-	char *command = (char*) malloc(50);
+	char *command = (char*) malloc(MAX_COMMAND_LENGTH);
+	char *result = (char*) malloc(MAX_COMMAND_LENGTH);
 
 	strcpy(command, "(1 * (1 + ((100) / (10 % 100))");
+	strcpy(result, "(11)");
 
 	Parser *parser = new Parser(command);
 	assert(parser->parse());
 	parser->postProcess();
 
+	assert(strcmp(result, parser->syntaxTree->toCommand()) == 0);
 
+	delete parser;
+	free(result);
 	free(command);
 }
 
-void Tester::testAutocorrector() {
+void Tester::testAutocorrectorRT() {
 	cout << "___________Testing AutoCorrector Real-Time___________" << endl;
 
-		while (true) {
-			char * command = readline("> ");
-			if (!command)
-				break;
-			if (strlen(command) == 0)
-				continue;
-			if (*command)
-				add_history(command);
-			if (strcmp(command, "quit") == 0) {
-				free(command);
-				break;
-			}
-
-			AutoCorrector *ac = new AutoCorrector(command);
-			command = ac->autoCorrect();
-			cout << endl;
-			cout << "Final: " << command << endl;
+	while (true) {
+		char * command = readline("> ");
+		if (!command)
+			break;
+		if (strlen(command) == 0)
+			continue;
+		if (*command)
+			add_history(command);
+		if (strcmp(command, "quit") == 0) {
+			free(command);
+			break;
 		}
+
+		AutoCorrector *ac = new AutoCorrector(command);
+		command = ac->autoCorrect();
+		cout << endl;
+		cout << "Final: " << command << endl;
+	}
 
 }
 
@@ -282,8 +289,12 @@ void Tester::testEvaluatorRT() {
 		parser->parse();
 		parser->postProcess();
 
+		parser->printSyntaxTree();
+
 		Evaluator *eval = new Evaluator(parser->syntaxTree);
 		char *finalCommand = eval->evaluate();
+
+		cout << "FINAL: " << finalCommand << endl;
 
 		free(command);
 	}
@@ -300,4 +311,66 @@ void Tester::testVariablePool() {
 	cout << varPool->generateVariable() << endl;
 	cout << varPool->generateVariable() << endl;
 	cout << varPool->generateVariable() << endl;
+}
+
+void Tester::testEvaluator() {
+	cout << "___________Testing Evaluator___________" << endl;
+
+	const int commands = 7;
+	const int maxCommandLen = 100;
+
+	char **command = (char**) malloc(commands * sizeof(char*));
+	for (int i = 0; i < commands; i++)
+		command[i] = (char*) malloc(maxCommandLen);
+
+	strcpy(command[0], "((\\x. x) (\\y. (y y)))");
+	strcpy(command[1], "((\\w. y) ((\\x. (x x)) (\\x. (x x))))");
+	strcpy(command[2], "(\\x. ((\\y. y) k))");
+	strcpy(command[3], "((\\x. x) ((\\y. (y y)) r))");
+	strcpy(command[4], "((\\x. ((\\y. (y x)) w)) f)");
+	strcpy(command[5], "((\\x. x) x)");
+	strcpy(command[6], "((\\x. (\\y. ((z x) y))) (w y))");
+
+	char **actualCommand = (char**) malloc(commands * sizeof(char*));
+	for (int i = 0; i < commands; i++)
+		actualCommand[i] = (char*) malloc(maxCommandLen);
+
+	strcpy(actualCommand[0], "(\\y. (y y))");
+	strcpy(actualCommand[1], "y");
+	strcpy(actualCommand[2], "(\\x. k)");
+	strcpy(actualCommand[3], "(r r)");
+	strcpy(actualCommand[4], "(w f)");
+	strcpy(actualCommand[5], "x");
+	strcpy(actualCommand[6], "(\\_var0. ((z (w y)) _var0))");
+
+
+	for (int i = 0; i < commands; i++) {
+		cout << "> " << command[i] << endl;
+
+		Parser *parser = new Parser(command[i]);
+		assert(parser->parse());
+		parser->postProcess();
+
+		Evaluator *evaluator = new Evaluator(parser->syntaxTree);
+
+		command[i] = evaluator->evaluate();
+
+		delete parser;
+		delete evaluator;
+	}
+
+
+	for (int i = 0; i < commands; i++) {
+		assert(strcmp(command[i], actualCommand[i]) == 0);
+		free(command[i]);
+		free(actualCommand[i]);
+	}
+	free(actualCommand);
+	free(command);
+}
+
+void Tester::globalTest() {
+//	this->testCalculator();
+//	this->testParser();
+	this->testEvaluator();
 }

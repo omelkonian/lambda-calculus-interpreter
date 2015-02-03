@@ -22,6 +22,8 @@ private:
 	int getFirstCharPos();
 	char getLastChar();
 	int getLastCharPos();
+	int getLeftParNo();
+	int getRightParNo();
 };
 
 #endif /* ERROR_HANDLER_AUTOCORRECTOR_H_ */

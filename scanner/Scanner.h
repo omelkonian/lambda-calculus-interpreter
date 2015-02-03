@@ -26,6 +26,11 @@ public:
 	char* getCommand();
 
 	Token* nextToken();
+
+	static bool isValidVarSymbol(char symbol);
+	static bool isValidDigit(char symbol);
+	static bool isValidOperator(char symbol);
+
 };
 
 #endif /* LCI_SCANNER_SCANNER_H_ */

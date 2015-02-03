@@ -20,10 +20,17 @@
 #include "defines.h"
 #include "parser/Parser.h"
 #include "tests/Tester.h"
+#include "evaluator/Evaluator.h"
+#include "error_handler/AutoCorrector.h"
 
 using namespace std;
 
 int main() {
+	// (\x. ((\z. ((k l) m)) x))
+	// (((\x. ((x x) y)) (\x. ((x x) y))) y)
+	// ((\x. (\y. ((z x) y))) (w y))
+	// ((\x. x) ((\y. (y y)) r))
+	// (\x. ((\y. y) k))
 	// ((\x. (\y. x)) (\z. z))
 	// ((\x. x) (\y. y))
 	// ((\x. x) ((\y. y) (\z. z)))
@@ -37,9 +44,12 @@ int main() {
 //		tester->testParser();
 //		tester->testAST();
 //		tester->testParserErrors();
-//		tester->testAutocorrector();
-		tester->testEvaluatorRT();
+		tester->testAutocorrectorRT();
+//		tester->testEvaluatorRT();
+//		tester->testEvaluator();
 //		tester->testVariablePool();
+
+//		tester->globalTest();
 		return 0;
 	}
 
@@ -56,9 +66,22 @@ int main() {
 			break;
 		}
 
-		Parser *parser = new Parser(command);
+		AutoCorrector *autoCorrector = new AutoCorrector(command);
+		command = autoCorrector->autoCorrect();
 
-		cout << "Syntax is " << (parser->parse() ? "correct." : "wrong.") << endl;
+		Parser *parser = new Parser(command);
+		if (parser->parse()) {
+			parser->postProcess();
+
+//			parser->printSyntaxTree();
+
+			Evaluator *evaluator = new Evaluator(parser->syntaxTree);
+			command = evaluator->evaluate();
+
+			cout << "-> " << command << endl;
+		}
+		else
+			cout << "ERROR: Syntax is wrong" << endl;
 
 		free(command);
 	}
