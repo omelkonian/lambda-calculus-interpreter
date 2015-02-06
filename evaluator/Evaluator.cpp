@@ -54,11 +54,11 @@ char* Evaluator::evaluate() {
 		}
 		else if (etaExists) {
 			InternalNode *nextEta = this->syntaxTree->getEtaNode();
-			nextEta->print(5);
+//			nextEta->print(5);
 			this->syntaxTree->eta_convert(nextEta);
 		}
 
-		this->syntaxTree->print();
+//		this->syntaxTree->print();
 
 		betaExists = this->syntaxTree->bReductionExists();
 		etaExists = this->syntaxTree->etaConversionExists();

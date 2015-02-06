@@ -45,18 +45,18 @@ bool isDigit(char symbol) {
 char* AutoCorrector::autoCorrect() {
 	// #1. No out-most parentheses
 	if ((this->getLastChar() != ')' && this->getFirstChar() != '(')) {
-		this->insertAt(this->getFirstCharPos(), '(');
-		this->insertAt(this->getLastCharPos() + 1, ')');
+		this->insertSymbolAt(this->getFirstCharPos(), '(');
+		this->insertSymbolAt(this->getLastCharPos() + 1, ')');
 		cout << "#1: " << command << endl;
 	}
 	// #2. No rightmost parenthesis
 	else if (this->getFirstChar() == '(' && this->getLastChar() != ')') {
-		this->insertAt(this->getLastCharPos() + 1, ')');
+		this->insertSymbolAt(this->getLastCharPos() + 1, ')');
 		cout << "#2: " << command << endl;
 	}
 	// #3. No leftmost parenthesis
 	else if (this->getLastChar() == ')' && this->getFirstChar() != '(') {
-		this->insertAt(this->getFirstCharPos(), '(');
+		this->insertSymbolAt(this->getFirstCharPos(), '(');
 		cout << "#3: " << command << endl;
 	}
 
@@ -64,11 +64,11 @@ char* AutoCorrector::autoCorrect() {
 	for (int i = 1; i < (int) strlen(command) - 1; i++) {
 		if (isOperator(command[i])) {
 			if (command[i - 1] != 32 && isDigit(command[i - 1])) {
-				this->insertAt(i, 32);
+				this->insertSymbolAt(i, 32);
 				i++;
 			}
 			if (command[i + 1] != 32 && isDigit(command[i - 1]))
-				this->insertAt(i + 1, 32);
+				this->insertSymbolAt(i + 1, 32);
 
 		}
 	}
@@ -108,9 +108,9 @@ char* AutoCorrector::autoCorrect() {
 				if (ranges.size() > 1) {
 					int offset = 0;
 					for (int i = 1; i < (int) ranges.size(); i++)
-						this->insertAt(ranges[0]->min + (offset++), '(');
+						this->insertSymbolAt(ranges[0]->min + (offset++), '(');
 					for (int i = 1; i < (int) ranges.size(); i++)
-						this->insertAt(ranges[i]->max + (offset++), ')');
+						this->insertSymbolAt(ranges[i]->max + (offset++), ')');
 
 				}
 			}
@@ -120,7 +120,7 @@ char* AutoCorrector::autoCorrect() {
 	return this->command;
 }
 
-void AutoCorrector::insertAt(int position, char symbol) {
+void AutoCorrector::insertSymbolAt(int position, char symbol) {
 	assert(position < (int) strlen(command));
 	char *newCommand = (char*) malloc(strlen(command) + 2);
 

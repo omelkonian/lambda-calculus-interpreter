@@ -1,0 +1,13 @@
+% ------------------Prelude------------------------
+
+% BOOLEAN
+true  := (\x. (\y. x));
+false := (\x. (\y. y));
+
+% PAIR
+pair  := (\x. (\y. (\t. ((t x) y))));
+fst   := (\z. (z true));
+snd   := (\z. (z false));
+
+% COMBINATORS
+Y := (\f. ((\x. (f (x x))) (\x. (f (x x)))))

@@ -36,9 +36,15 @@ public:
 	void testParserErrors();
 	void testAutocorrectorRT();
 
-	// INTERNAL TREE OPERATIONS
+	// TREE OPERATIONS
 	void testAST();
 	void testVariablePool();
+
+	// STRING OPERATIONS
+	void testStringManipulation();
+
+	// ALIAS MANAGER
+	void testAliasing();
 
 
 	void globalTest();

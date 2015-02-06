@@ -24,6 +24,9 @@
 #include "../error_handler/AutoCorrector.h"
 #include "../evaluator/Evaluator.h"
 #include "../abstract_syntax_tree/VariablePool.h"
+#include "../utilities/Range.h"
+#include "../utilities/Utilities.h"
+#include "../alias_manager/AliasManager.h"
 
 using namespace std;
 
@@ -373,4 +376,41 @@ void Tester::globalTest() {
 //	this->testCalculator();
 //	this->testParser();
 	this->testEvaluator();
+}
+
+void Tester::testStringManipulation() {
+	char *command = (char*) malloc(9);
+	strcpy(command, "123456789");
+	command = Utilities::remove(command, new Range(0, 1));
+
+	char *toInsert = (char*) malloc(7);
+	strcpy(toInsert, "abcdef");
+	command = Utilities::insertAt(command, toInsert, 4);
+
+	assert(strcmp(command, "3456abcdef") == 0);
+}
+
+void Tester::testAliasing() {
+	AliasManager *aliasManager = new AliasManager();
+	aliasManager->consult("files/prelude.alias");
+
+	char *command = (char*) malloc(MAX_COMMAND_LENGTH);
+	strcpy(command, "(snd ((pair x1) x2))");
+
+	command = aliasManager->translate(command);
+
+	Parser *parser = new Parser(command);
+	if (parser->parse()) {
+		parser->postProcess();
+
+		Evaluator *evaluator = new Evaluator(parser->syntaxTree);
+		command = evaluator->evaluate();
+		cout << "FINAL: " << command << endl;
+	}
+	else
+		cout << "ERROR: Syntax is wrong" << endl;
+
+	assert(strcmp(command, "x2") == 0);
+
+	cout << command << endl;
 }

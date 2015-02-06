@@ -17,7 +17,7 @@ public:
 	char* autoCorrect();
 
 private:
-	void insertAt(int position, char symbol);
+	void insertSymbolAt(int position, char symbol);
 	char getFirstChar();
 	int getFirstCharPos();
 	char getLastChar();

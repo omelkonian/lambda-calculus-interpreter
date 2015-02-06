@@ -393,7 +393,6 @@ std::vector<char*> AST::freeVariables(InternalNode* node) {
 		return fv1;
 	} else if (node->type == ABSTRACTION) {
 		char *bindingVar = ((Leaf*) node->children[1])->token->value->value.string;
-		cout << "Binding var: " << bindingVar << endl;
 		std::vector<char*> freeVars = this->freeVariables((InternalNode*) (node->children[2]));
 		for (int i = 0; i < (int) freeVars.size(); i++) {
 			if (strcmp(freeVars[i], bindingVar) == 0) {

@@ -22,6 +22,7 @@
 #include "tests/Tester.h"
 #include "evaluator/Evaluator.h"
 #include "error_handler/AutoCorrector.h"
+#include "alias_manager/AliasManager.h"
 
 using namespace std;
 
@@ -44,10 +45,12 @@ int main() {
 //		tester->testParser();
 //		tester->testAST();
 //		tester->testParserErrors();
-		tester->testAutocorrectorRT();
+//		tester->testAutocorrectorRT();
 //		tester->testEvaluatorRT();
 //		tester->testEvaluator();
 //		tester->testVariablePool();
+//		tester->testStringManipulation();
+		tester->testAliasing();
 
 //		tester->globalTest();
 		return 0;
@@ -66,8 +69,12 @@ int main() {
 			break;
 		}
 
-		AutoCorrector *autoCorrector = new AutoCorrector(command);
-		command = autoCorrector->autoCorrect();
+		AliasManager *aliasManager = new AliasManager();
+		aliasManager->consult("");
+		command = aliasManager->translate(command);
+
+//		AutoCorrector *autoCorrector = new AutoCorrector(command);
+//		command = autoCorrector->autoCorrect();
 
 		Parser *parser = new Parser(command);
 		if (parser->parse()) {
