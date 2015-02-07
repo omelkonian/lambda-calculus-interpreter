@@ -10,28 +10,31 @@
 
 #include <vector>
 #include <map>
+#include <string>
 #include "Variable.h"
 
 using namespace std;
 
+typedef pair<string, Range*> replaceTuple;
+
 class AliasManager {
-	map<char*, const char*> aliasMap;
-	vector<char*> files;
+	map<string, string> aliasMap;
+	vector<string> files;
 public:
 	AliasManager();
 	virtual ~AliasManager();
 
-	void consult(char *file);
-	char* deAlias(char *name);
-	void addAlias(char *translateTo, char *toTranslate);
-	char* translate(char *command);
+	void consult(const char *file);
+	string deAlias(string name);
+	void addAlias(string translateTo, string toTranslate);
+	string translate(string command);
 
 	void printAliases();
 
 private:
-	char* translate1(char *command);
-	char* replace(char *command, map<char*, Range*> replacements, vector<char*> varsToReplace);
-	vector<Variable*> getVariables(char *command);
+	string translate1(string command);
+	string replace(string command, vector<replaceTuple> replacements);
+	vector<Variable*> getVariables(const char *command);
 	bool changesMade;
 };
 

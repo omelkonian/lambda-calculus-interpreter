@@ -7,6 +7,7 @@
 
 #include "Consultor.h"
 #include "../defines.h"
+#include "../parser/Parser.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +19,7 @@ using namespace std;
 
 #include <assert.h>
 
-Consultor::Consultor(char *filename) {
+Consultor::Consultor(const char *filename) {
 	this->filename = filename;
 }
 
@@ -41,7 +42,7 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 		while (getline(file, line)) {
 			stringstream lineStream(line);
 
-			if (line[0] == '%')
+			if (line.empty() || line[0] == '%' || line[0] == 13)
 				continue;
 
 			char *alias = (char*) malloc(MAX_VARIABLE_LENGTH);
@@ -52,7 +53,7 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 			char *term = (char*) malloc(MAX_COMMAND_LENGTH);
 
 			int cur = 0;
-			char ch;
+			char ch = lineStream.get();
 			ch = lineStream.get();
 
 			while (ch != ';') {
@@ -60,6 +61,7 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 				ch = lineStream.get();
 			}
 			term[cur] = '\0';
+//			cout << "Term: " << term << endl;
 
 			bool isValidTerm = this->checkTerm(term);
 			if (!isValidTerm) {
@@ -67,10 +69,6 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 				succeeded = false;
 				break;
 			}
-
-			// Minimize memory allocation.
-			alias = (char*) realloc(alias, strlen(alias) + 1);
-			term = (char*) realloc(term, strlen(term) + 1);
 
 			aliases.push_back(alias);
 			terms.push_back(term);
@@ -82,8 +80,11 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 
 	if (succeeded) {
 		// Update Alias Manager
-		for (int i = 0; i < (int) aliases.size(); i++)
-			aliasManager->addAlias(terms[i], aliases[i]);
+		for (int i = 0; i < (int) aliases.size(); i++) {
+			aliasManager->addAlias(string(terms[i]), string(aliases[i]));
+			free(terms[i]);
+			free(aliases[i]);
+		}
 	}
 	else {
 		// Free memory
@@ -92,11 +93,12 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 			free(terms[i]);
 		}
 	}
+	cout << "consulted" << endl;
 }
 
 bool Consultor::checkTerm(char* term) {
 	Parser *parser = new Parser(term);
-	bool ret = parser->parse;
+	bool ret = parser->parse();
 	delete parser;
 	return ret;
 }

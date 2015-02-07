@@ -17,6 +17,8 @@
 #include "../defines.h"
 #include "Consultor.h"
 
+#include <map>
+#include <stdio.h>
 #include <fstream>
 #include <iostream>
 
@@ -33,73 +35,63 @@ AliasManager::AliasManager() {
 }
 
 AliasManager::~AliasManager() {
-	// TODO Auto-generated destructor stub
+	// TODO free memory
 }
 
-void AliasManager::consult(char *file) {
+void AliasManager::consult(const char *file) {
 	Consultor *consultor = new Consultor(file);
 	consultor->getStatements(this);
 }
 
-char* AliasManager::deAlias(char *name) {
-	for (map<char*, const char*>::iterator it = this->aliasMap.begin(); it != this->aliasMap.end(); ++it) {
-		if (strcmp(name, it->first) == 0) {
-			const char *found = it->second;
-			char *ret = (char*) malloc(strlen(found) + 1);
-			strcpy(ret, found);
-			ret[strlen(found)] = '\0';
-			return ret;
+string AliasManager::deAlias(string name) {
+	for (map<string, string>::iterator it = this->aliasMap.begin(); it != this->aliasMap.end(); ++it) {
+		if (name.compare(it->first) == 0) {
+			string found(it->second);
+			return found;
 		}
 	}
-	return NULL;
+	return string("");
 }
 
-char* AliasManager::translate(char* command) {
-	char *copy = (char*) malloc(MAX_COMMAND_LENGTH);
-	strcpy(copy, command);
-	command = this->translate1(command);
-	while (strcmp(copy, command)) {
-		strcpy(copy, command);
-		command = this->translate1(command);
-	}
-	free(copy);
-	return command;
+string AliasManager::translate(string command) {
+	string ret(command);
+	ret = this->translate1(ret);
+	while (this->changesMade)
+		ret = this->translate1(ret);
+	return ret;
 }
 
-char* AliasManager::translate1(char *command) {
-	map<char*, Range*> replacements;
-	vector<char*> variablesToReplace;
-	vector<Variable*> variables = this->getVariables(command);
+string AliasManager::translate1(string command) {
+	vector<replaceTuple> replacements;
+	vector<Variable*> variables = this->getVariables(command.c_str());
 
 	this->changesMade = false;
-	for (int i = 0; i < (int) variables.size(); i++) {
-		char *name = variables[i]->name;
-		char *alias = this->deAlias(name);
+	for (int i = 0; i < (int)variables.size(); i++) {
+		string name = variables[i]->name;
+		string alias = this->deAlias(name);
 
-		if (alias) {
+		if (!alias.empty()) {
 			changesMade = true;
-			replacements[alias] = variables[i]->range;
-			variablesToReplace.push_back(alias);
+			replacements.push_back(pair<string, Range*>(alias, variables[i]->range));
 		}
 	}
 
-	return this->replace(command, replacements, variablesToReplace);
+	return this->replace(command, replacements);
 }
 
-char* AliasManager::replace(char* command, map<char*, Range*> replacements, vector<char*> varsToReplace) {
-	for (int i = (int) varsToReplace.size() - 1; i >= 0; i--) {
-		Range *range = replacements[varsToReplace[i]];
-		command = Utilities::remove(command, range);
-		command = Utilities::insertAt(command, varsToReplace[i], range->min);
+string AliasManager::replace(string command, vector<replaceTuple> replacements) {
+	for (int i = (int)replacements.size() - 1; i >= 0; i--) {
+		Range *range = replacements[i].second;
+		command.replace(range->min, range->max - range->min + 1, replacements[i].first);
 	}
 	return command;
 }
 
-void AliasManager::addAlias(char* translateTo, char* toTranslate) {
-	this->aliasMap[toTranslate] = (const char*) translateTo;
+void AliasManager::addAlias(string translateTo, string toTranslate) {
+	this->aliasMap[toTranslate] = translateTo;
 }
 
-vector<Variable*> AliasManager::getVariables(char *command) {
+vector<Variable*> AliasManager::getVariables(const char *command) {
 	int i = 0;
 	vector<char*> variables;
 	vector<Range*> ranges;
@@ -116,7 +108,7 @@ vector<Variable*> AliasManager::getVariables(char *command) {
 				var = (char*) malloc(MAX_COMMAND_LENGTH);
 				var[0] = command[i];
 				var[1] = '\0';
-			} else {
+			} else if (Scanner::isValidVarSymbol(command[i])){
 				maxRange++;
 				int end = (int) strlen(var);
 				var[end] = command[i];
@@ -142,7 +134,9 @@ vector<Variable*> AliasManager::getVariables(char *command) {
 	// Construct var vector
 	vector<Variable*> ret;
 	for (int i = 0; i < (int) variables.size(); i++) {
-		Variable *variable = new Variable(variables[i], ranges[i]);
+		string toInsert(variables[i]);
+		Variable *variable = new Variable(toInsert, ranges[i]);
+		free(variables[i]);
 		ret.push_back(variable);
 	}
 
@@ -150,6 +144,6 @@ vector<Variable*> AliasManager::getVariables(char *command) {
 }
 
 void AliasManager::printAliases() {
-	for (map<char*, const char*>::iterator it = this->aliasMap.begin(); it != this->aliasMap.end(); ++it)
+	for (map<string, string>::iterator it = this->aliasMap.begin(); it != this->aliasMap.end(); ++it)
 		cout << it->first << " => " << it->second << '\n';
 }

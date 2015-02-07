@@ -67,6 +67,7 @@ char* AST::toCommand() {
 	char *command = (char*) malloc(MAX_COMMAND_LENGTH);
 	int writePosition = 0;
 	this->toCommand1(this->root, &writePosition, command);
+	command[writePosition] = '\0';
 	return command;
 }
 

@@ -3,6 +3,8 @@
 % BOOLEAN
 true  := (\x. (\y. x));
 false := (\x. (\y. y));
+not   := (\z. ((z false) true));
+cond  := (\z. (\x. (\y. ((z x) y))));
 
 % PAIR
 pair  := (\x. (\y. (\t. ((t x) y))));
@@ -10,4 +12,4 @@ fst   := (\z. (z true));
 snd   := (\z. (z false));
 
 % COMBINATORS
-Y := (\f. ((\x. (f (x x))) (\x. (f (x x)))))
+Y := (\f. ((\x. (f (x x))) (\x. (f (x x)))));

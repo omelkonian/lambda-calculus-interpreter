@@ -28,14 +28,8 @@ char* Evaluator::evaluate() {
 		if (betaExists) {
 			// Execute leftmost application (lazy evaluation)
 			InternalNode *nextApplication = this->syntaxTree->getFirstApplication();
-//			cout << "NEXT_APPL:" << endl << endl;
-//			nextApplication->print(5);
 			InternalNode *parent = this->syntaxTree->getParent(nextApplication);
-//			cout << "PARENT:" << endl << endl;
-//			parent->print(5);
 			InternalNode *newNode = this->syntaxTree->substitute(nextApplication);
-//			cout << "NEW_NODE:" << endl << endl;
-//			newNode->print(5);
 
 			if (!parent) {
 				// Replace root.
@@ -54,11 +48,8 @@ char* Evaluator::evaluate() {
 		}
 		else if (etaExists) {
 			InternalNode *nextEta = this->syntaxTree->getEtaNode();
-//			nextEta->print(5);
 			this->syntaxTree->eta_convert(nextEta);
 		}
-
-//		this->syntaxTree->print();
 
 		betaExists = this->syntaxTree->bReductionExists();
 		etaExists = this->syntaxTree->etaConversionExists();

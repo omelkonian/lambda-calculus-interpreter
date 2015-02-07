@@ -71,7 +71,7 @@ int main() {
 
 		AliasManager *aliasManager = new AliasManager();
 		aliasManager->consult("");
-		command = aliasManager->translate(command);
+//		command = aliasManager->translate(command);
 
 //		AutoCorrector *autoCorrector = new AutoCorrector(command);
 //		command = autoCorrector->autoCorrect();

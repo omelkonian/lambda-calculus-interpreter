@@ -13,9 +13,9 @@
 using namespace std;
 
 class Consultor {
-	char *filename;
+	const char *filename;
 public:
-	Consultor(char *filename);
+	Consultor(const char *filename);
 	virtual ~Consultor();
 
 	void getStatements(AliasManager *aliasManager);

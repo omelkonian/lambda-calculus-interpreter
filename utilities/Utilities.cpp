@@ -20,7 +20,7 @@ Utilities::~Utilities() {
 }
 
 char* Utilities::insertAt(char* command, char* toInsert, int position) {
-	assert(position < (int ) strlen(command));
+	assert(position <= (int ) strlen(command));
 	char *newCommand = (char*) malloc(strlen(command) + strlen(toInsert) + 1);
 
 	int i = 0;
@@ -43,18 +43,25 @@ char* Utilities::insertAt(char* command, char* toInsert, int position) {
 char* Utilities::remove(char* command, Range* range) {
 	assert(range->min >= 0 && range->max < (int )strlen(command));
 	int removeLen = range->max - range->min + 1;
+
+	cout << " =?= address: " << (void*)command << endl;
+	command = (char*) realloc(command, strlen(command) + 1);
+
 	char *newCommand = (char*) malloc(strlen(command) - removeLen + 1);
 
 	int i = 0;
 	while (i < range->min)
 		newCommand[i] = command[i++];
-
 	while (i < (int)strlen(command) - removeLen) {
 		newCommand[i] = command[i + removeLen];
 		i++;
 	}
 
 	newCommand[i] = '\0';
+	cout << command << endl;
+	cout << "len: " << strlen(command) << endl;
+	cout << newCommand << endl;
+	cout << "len: " << strlen(newCommand) << endl;
 	free(command);
 	return newCommand;
 }

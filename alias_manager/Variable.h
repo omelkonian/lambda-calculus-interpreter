@@ -16,15 +16,14 @@ using namespace std;
 
 class Variable {
 public:
-	char *name;
+	string name;
 	Range *range;
 
-	Variable(char *name, Range *range) {
+	Variable(string name, Range *range) {
 		this->name = name;
 		this->range = range;
 	}
 	virtual ~Variable() {
-		free(this->name);
 		delete range;
 	}
 

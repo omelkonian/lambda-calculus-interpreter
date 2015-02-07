@@ -381,36 +381,39 @@ void Tester::globalTest() {
 void Tester::testStringManipulation() {
 	char *command = (char*) malloc(9);
 	strcpy(command, "123456789");
-	command = Utilities::remove(command, new Range(0, 1));
+	command = Utilities::remove(command, new Range(1, 5));
 
 	char *toInsert = (char*) malloc(7);
 	strcpy(toInsert, "abcdef");
 	command = Utilities::insertAt(command, toInsert, 4);
 
-	assert(strcmp(command, "3456abcdef") == 0);
+	assert(strcmp(command, "3456abcdef789") == 0);
 }
 
 void Tester::testAliasing() {
 	AliasManager *aliasManager = new AliasManager();
 	aliasManager->consult("files/prelude.alias");
 
-	char *command = (char*) malloc(MAX_COMMAND_LENGTH);
-	strcpy(command, "(snd ((pair x1) x2))");
+	string command("(snd ((pair x1) x2))");
+//	string command("((false x1) x2)");
+//	string command("(false false)");
 
 	command = aliasManager->translate(command);
 
-	Parser *parser = new Parser(command);
+	char *toExecute = (char*) malloc(strlen(command.c_str()) + 1);
+	strcpy(toExecute, command.c_str());
+	cout << "toExecute: " << toExecute << endl;
+
+	Parser *parser = new Parser(toExecute);
 	if (parser->parse()) {
 		parser->postProcess();
 
 		Evaluator *evaluator = new Evaluator(parser->syntaxTree);
-		command = evaluator->evaluate();
-		cout << "FINAL: " << command << endl;
+		toExecute = evaluator->evaluate();
+		cout << "FINAL: " << toExecute << endl;
 	}
 	else
 		cout << "ERROR: Syntax is wrong" << endl;
 
-	assert(strcmp(command, "x2") == 0);
-
-	cout << command << endl;
+	assert(strcmp(toExecute, "x2") == 0);
 }
