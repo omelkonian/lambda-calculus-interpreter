@@ -11,6 +11,7 @@
 #include "Node.h"
 #include "InternalNode.h"
 #include "VariablePool.h"
+#include <vector>
 
 class AST {
 	Node *root;
@@ -44,6 +45,9 @@ public:
 	// Renames the binded variable of an abstraction to a newly generated variable name.
 	void alpha_convert(InternalNode *abstraction);
 
+	// Replaces a subtree with another subtree.
+	void replace(InternalNode *toRemove, InternalNode *toInsert);
+
 	// Returns the free variables of a term.
 	std::vector<char*> freeVariables(InternalNode *node);
 
@@ -54,6 +58,8 @@ public:
 	void setRoot(Node *root);
 
 	InternalNode* getParent(Node *child);
+
+	std::vector<InternalNode*> getAllNumberExpressions();
 
 	void print();
 
@@ -68,7 +74,6 @@ private:
 	void etaConversionExists1(Node *node, bool *found);
 
 	void substitute1(InternalNode *node, InternalNode *toInsert, char *varToSub);
-	void eta_convert1(Node *node, char *varName, char *replacement);
 	void alpha_convert1(Node *node, char *varName, char *replacement);
 
 	void getFirstApplication1(Node *node, InternalNode **found);
@@ -76,6 +81,10 @@ private:
 
 	void getParent1(Node *cur, Node *child, InternalNode **parent);
 	void toCommand1(Node *node, int *writePos, char *command);
+
+	void replace1(Node *node, InternalNode *toRemove, InternalNode *toInsert, bool *replaced);
+
+	void getAllNumberExpressions1(Node *node, std::vector<InternalNode*> *vector);
 };
 
 #endif /* ABSTRACT_SYNTAX_TREE_AST_H_ */

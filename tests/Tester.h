@@ -46,6 +46,8 @@ public:
 	// ALIAS MANAGER
 	void testAliasing();
 
+	// CHURCH ENCODING
+	void testChurchNumerals();
 
 	void globalTest();
 };

@@ -50,7 +50,8 @@ int main() {
 //		tester->testEvaluator();
 //		tester->testVariablePool();
 //		tester->testStringManipulation();
-		tester->testAliasing();
+//		tester->testAliasing();
+		tester->testChurchNumerals();
 
 //		tester->globalTest();
 		return 0;
@@ -70,26 +71,30 @@ int main() {
 		}
 
 		AliasManager *aliasManager = new AliasManager();
-		aliasManager->consult("");
-//		command = aliasManager->translate(command);
+		aliasManager->consult("files/prelude.alias");
 
-//		AutoCorrector *autoCorrector = new AutoCorrector(command);
-//		command = autoCorrector->autoCorrect();
+		string command2(command);
+	//	string command("((false x1) x2)");
+	//	string command("(false false)");
 
-		Parser *parser = new Parser(command);
+		command2 = aliasManager->translate(command2);
+
+		char *toExecute = (char*) malloc(strlen(command2.c_str()) + 1);
+		strcpy(toExecute, command2.c_str());
+		cout << "toExecute: " << toExecute << endl;
+
+		Parser *parser = new Parser(toExecute);
 		if (parser->parse()) {
 			parser->postProcess();
 
-//			parser->printSyntaxTree();
+			parser->printSyntaxTree();
 
 			Evaluator *evaluator = new Evaluator(parser->syntaxTree);
-			command = evaluator->evaluate();
-
-			cout << "-> " << command << endl;
+			toExecute = evaluator->evaluate();
+			cout << "FINAL: " << toExecute << endl;
 		}
 		else
 			cout << "ERROR: Syntax is wrong" << endl;
-
 		free(command);
 	}
 }

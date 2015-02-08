@@ -27,6 +27,8 @@
 #include "../utilities/Range.h"
 #include "../utilities/Utilities.h"
 #include "../alias_manager/AliasManager.h"
+#include "../church_numerals/ChurchNumerator.h"
+
 
 using namespace std;
 
@@ -53,7 +55,8 @@ void Tester::testScannerErrorsRT() {
 		}
 
 		Scanner *scanner = new Scanner(command);
-		while (Token *token = scanner->nextToken()) {}
+		while (Token *token = scanner->nextToken()) {
+		}
 
 		free(command);
 	}
@@ -346,7 +349,6 @@ void Tester::testEvaluator() {
 	strcpy(actualCommand[5], "x");
 	strcpy(actualCommand[6], "(\\_var0. ((z (w y)) _var0))");
 
-
 	for (int i = 0; i < commands; i++) {
 		cout << "> " << command[i] << endl;
 
@@ -361,7 +363,6 @@ void Tester::testEvaluator() {
 		delete parser;
 		delete evaluator;
 	}
-
 
 	for (int i = 0; i < commands; i++) {
 		assert(strcmp(command[i], actualCommand[i]) == 0);
@@ -411,9 +412,31 @@ void Tester::testAliasing() {
 		Evaluator *evaluator = new Evaluator(parser->syntaxTree);
 		toExecute = evaluator->evaluate();
 		cout << "FINAL: " << toExecute << endl;
-	}
-	else
+	} else
 		cout << "ERROR: Syntax is wrong" << endl;
 
 	assert(strcmp(toExecute, "x2") == 0);
+}
+
+void Tester::testChurchNumerals() {
+	string command("(((\\x.(\\y. y)) 1) 2)");
+
+	char *toExecute = (char*) malloc(strlen(command.c_str()) + 1);
+	strcpy(toExecute, command.c_str());
+
+	Parser *parser = new Parser(toExecute);
+	if (parser->parse()) {
+		parser->postProcess();
+
+		ChurchNumerator *numerator = new ChurchNumerator(parser->syntaxTree);
+		numerator->termsToNumbers();
+
+		cout << parser->syntaxTree->toCommand() << endl;
+
+		Evaluator *evaluator = new Evaluator(parser->syntaxTree);
+		toExecute = evaluator->evaluate();
+	} else
+		cout << "ERROR: Syntax is wrong" << endl;
+
+	assert(strcmp(toExecute, "(\\f. (\\x. (f (f x))))") == 0);
 }
