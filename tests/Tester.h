@@ -47,7 +47,8 @@ public:
 	void testAliasing();
 
 	// CHURCH ENCODING
-	void testChurchNumerals();
+	void testEnchurch();
+	void testDechurch();
 
 	void globalTest();
 };

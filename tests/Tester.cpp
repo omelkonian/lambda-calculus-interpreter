@@ -418,7 +418,7 @@ void Tester::testAliasing() {
 	assert(strcmp(toExecute, "x2") == 0);
 }
 
-void Tester::testChurchNumerals() {
+void Tester::testEnchurch() {
 	string command("(((\\x.(\\y. y)) 1) 2)");
 
 	char *toExecute = (char*) malloc(strlen(command.c_str()) + 1);
@@ -429,7 +429,7 @@ void Tester::testChurchNumerals() {
 		parser->postProcess();
 
 		ChurchNumerator *numerator = new ChurchNumerator(parser->syntaxTree);
-		numerator->termsToNumbers();
+		numerator->enchurch();
 
 		cout << parser->syntaxTree->toCommand() << endl;
 
@@ -439,4 +439,21 @@ void Tester::testChurchNumerals() {
 		cout << "ERROR: Syntax is wrong" << endl;
 
 	assert(strcmp(toExecute, "(\\f. (\\x. (f (f x))))") == 0);
+}
+
+void Tester::testDechurch() {
+	string command("(\\f. (\\x. (f (f (f (f (f (f (f (f (f (f x))))))))))))");
+
+	char *toExecute = (char*) malloc(strlen(command.c_str()) + 1);
+	strcpy(toExecute, command.c_str());
+
+	Parser *parser = new Parser(toExecute);
+	if (parser->parse()) {
+		parser->postProcess();
+
+		ChurchNumerator *numerator = new ChurchNumerator(parser->syntaxTree);
+		numerator->dechurch();
+		numerator->printTree();
+	} else
+		cout << "ERROR: Syntax is wrong" << endl;
 }

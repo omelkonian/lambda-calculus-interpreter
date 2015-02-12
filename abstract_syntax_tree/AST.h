@@ -13,6 +13,8 @@
 #include "VariablePool.h"
 #include <vector>
 
+using namespace std;
+
 class AST {
 	Node *root;
 	VariablePool *varPool;
@@ -59,7 +61,8 @@ public:
 
 	InternalNode* getParent(Node *child);
 
-	std::vector<InternalNode*> getAllNumberExpressions();
+	vector<InternalNode*> getAllNumberExpressions();
+	vector<pair<InternalNode*, int> > getAllChurchNumerals();
 
 	void print();
 
@@ -85,6 +88,9 @@ private:
 	void replace1(Node *node, InternalNode *toRemove, InternalNode *toInsert, bool *replaced);
 
 	void getAllNumberExpressions1(Node *node, std::vector<InternalNode*> *vector);
+	void getAllChurchNumerals1(Node *node, vector<pair<InternalNode*, int> > *vector);
+
+	int isChurchNumeral(InternalNode *node);
 };
 
 #endif /* ABSTRACT_SYNTAX_TREE_AST_H_ */

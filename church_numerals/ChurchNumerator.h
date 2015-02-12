@@ -17,7 +17,10 @@ public:
 	ChurchNumerator(AST *syntaxTree);
 	virtual ~ChurchNumerator();
 
-	void termsToNumbers();
+	void enchurch();
+	void dechurch();
+
+	void printTree();
 
 private:
 	InternalNode *constructChurchNumeral(int number);

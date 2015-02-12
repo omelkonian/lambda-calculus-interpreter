@@ -7,6 +7,7 @@
 
 #include "ChurchNumerator.h"
 #include "../parser/Parser.h"
+#include "../abstract_syntax_tree/InternalNode.h"
 #include <string>
 #include <stdlib.h>
 #include <string.h>
@@ -21,7 +22,7 @@ ChurchNumerator::ChurchNumerator(AST *syntaxTree) {
 ChurchNumerator::~ChurchNumerator() {
 }
 
-void ChurchNumerator::termsToNumbers() {
+void ChurchNumerator::enchurch() {
 	vector<InternalNode*> numberExpressions = this->syntaxTree->getAllNumberExpressions();
 	for (int i = 0; i < (int)numberExpressions.size(); i++) {
 		// Get number
@@ -33,6 +34,22 @@ void ChurchNumerator::termsToNumbers() {
 		// Replace in syntaxTree
 		this->syntaxTree->replace(numberExpressions[i], numeral);
 	}
+}
+
+void ChurchNumerator::dechurch() {
+	vector<pair<InternalNode*, int> > churchNumerals = this->syntaxTree->getAllChurchNumerals();
+	for (int i = 0; i < (int)churchNumerals.size(); i++) {
+		InternalNode *newSubtree = new InternalNode(NUMBER_EXP);
+		int number = churchNumerals[i].second;
+		newSubtree->children.push_back(new Leaf(new Token(NUMBER, 0, new TokenValue(INTEGER, &number))));
+
+		// Replace in syntaxTree
+		this->syntaxTree->replace(churchNumerals[i].first, newSubtree);
+	}
+}
+
+void ChurchNumerator::printTree() {
+	this->syntaxTree->print();
 }
 
 InternalNode* ChurchNumerator::constructChurchNumeral(int number) {
@@ -51,5 +68,9 @@ InternalNode* ChurchNumerator::constructChurchNumeral(int number) {
 	Parser *parser = new Parser(command);
 	parser->parse();
 	parser->postProcess();
-	return (InternalNode*) parser->syntaxTree->getRoot();
+	InternalNode *ret = (InternalNode*) parser->syntaxTree->getRoot();
+	parser->syntaxTree->setRoot(NULL);
+	delete parser;
+
+	return ret;
 }

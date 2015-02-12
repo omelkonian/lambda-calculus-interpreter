@@ -51,7 +51,9 @@ int main() {
 //		tester->testVariablePool();
 //		tester->testStringManipulation();
 //		tester->testAliasing();
-		tester->testChurchNumerals();
+//		tester->testEnchurch();
+		tester->testDechurch();
+
 
 //		tester->globalTest();
 		return 0;

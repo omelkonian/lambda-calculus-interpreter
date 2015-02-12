@@ -490,3 +490,44 @@ void AST::getAllNumberExpressions1(Node* node, vector<InternalNode*> *vector) {
 	}
 }
 
+vector<pair<InternalNode*, int> > AST::getAllChurchNumerals() {
+	vector<pair<InternalNode*, int> > churchNumerals;
+	this->getAllChurchNumerals1(this->root, &churchNumerals);
+	return churchNumerals;
+}
+
+void AST::getAllChurchNumerals1(Node* node, vector<pair<InternalNode*, int> > *vector) {
+	if (dynamic_cast<InternalNode*>(node)) {
+		InternalNode *cur = (InternalNode*) node;
+		int number = this->isChurchNumeral(cur);
+		if (number != -1) vector->push_back(make_pair(cur, number));
+		for (int i = 0; i < (int)cur->children.size(); i++)
+			this->getAllChurchNumerals1(cur->children[i], vector);
+	}
+}
+
+int AST::isChurchNumeral(InternalNode* node) {
+	AST *tree = new AST(node);
+	char *command = tree->toCommand();
+	string string(command);
+	free(command);
+
+	if (string.substr(0, 10).compare("(\\f. (\\x. ") == 0) {
+		string.erase(0, 10);
+
+		int count = 0;
+		while (string.substr(0, 3).compare("(f ") == 0) {
+			string.erase(0, 3);
+			count++;
+		}
+		int cur = 0;
+		if (string[cur++] == 'x') {
+			for (int i = 0; i < count + 2; i++)
+				if (string[cur++] != ')')
+					return -1;
+			return count;
+		}
+
+	}
+	return -1;
+}
