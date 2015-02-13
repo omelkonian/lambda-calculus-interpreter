@@ -8,6 +8,7 @@
 #include "Evaluator.h"
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <iostream>
 
@@ -53,8 +54,10 @@ char* Evaluator::evaluate() {
 
 		betaExists = this->syntaxTree->bReductionExists();
 		etaExists = this->syntaxTree->etaConversionExists();
+//		this->syntaxTree->print();
 		char *newCommand = this->syntaxTree->toCommand();
 		cout << "-> " << newCommand << endl;
+		free(newCommand);
 	}
 
 	return this->syntaxTree->toCommand();

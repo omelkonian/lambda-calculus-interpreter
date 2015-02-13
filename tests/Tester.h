@@ -49,6 +49,12 @@ public:
 	// CHURCH ENCODING
 	void testEnchurch();
 	void testDechurch();
+	void testNumericOperations();
+
+
+
+
+
 
 	void globalTest();
 };

@@ -29,8 +29,8 @@ bool Scanner::isValidDigit(char symbol) {
 }
 
 bool Scanner::isValidOperator(char symbol) {
-	// Valid operators: +, -, *, %, /
-	return ((symbol == 37) || (symbol == 42) || (symbol == 43) || (symbol == 45) || (symbol == 47)) ? true : false;
+	// Valid operators: +, -, *, ^
+	return ((symbol == 43) || (symbol == 45) || (symbol == 42) || (symbol == 94)) ? true : false;
 }
 
 Scanner::Scanner(char *command) {

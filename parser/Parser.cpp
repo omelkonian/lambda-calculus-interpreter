@@ -139,11 +139,12 @@ bool Parser::X_2(InternalNode *node) {
 	bool ret = terminal(LAMBDA, node) && terminal(VARIABLE, node) && terminal(LAMBDA_DOT, node) && Term(node);
 	if (ret) {
 
-		if (bool t = terminal(RIGHT_PAR, node))
+		if (terminal(RIGHT_PAR, node))
  			return true;
 		else
 			print_error1("ERROR: ) missing.", this->curIndex + 1);
 	}
+	return false;
 }
 
 bool Parser::Y(InternalNode *node) {
@@ -178,6 +179,6 @@ bool Parser::Z_2(InternalNode *node) {
 
 void Parser::postProcess() {
 	this->syntaxTree->refine();
-	this->syntaxTree->doCalculations();
+//	this->syntaxTree->doCalculations();
 	this->syntaxTree->simplify();
 }

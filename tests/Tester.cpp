@@ -373,12 +373,6 @@ void Tester::testEvaluator() {
 	free(command);
 }
 
-void Tester::globalTest() {
-//	this->testCalculator();
-//	this->testParser();
-	this->testEvaluator();
-}
-
 void Tester::testStringManipulation() {
 	char *command = (char*) malloc(9);
 	strcpy(command, "123456789");
@@ -424,11 +418,14 @@ void Tester::testEnchurch() {
 	char *toExecute = (char*) malloc(strlen(command.c_str()) + 1);
 	strcpy(toExecute, command.c_str());
 
+	AliasManager *aliasManager = new AliasManager();
+	aliasManager->consult("files/prelude.alias");
+
 	Parser *parser = new Parser(toExecute);
 	if (parser->parse()) {
 		parser->postProcess();
 
-		ChurchNumerator *numerator = new ChurchNumerator(parser->syntaxTree);
+		ChurchNumerator *numerator = new ChurchNumerator(parser->syntaxTree, aliasManager);
 		numerator->enchurch();
 
 		cout << parser->syntaxTree->toCommand() << endl;
@@ -447,13 +444,58 @@ void Tester::testDechurch() {
 	char *toExecute = (char*) malloc(strlen(command.c_str()) + 1);
 	strcpy(toExecute, command.c_str());
 
+	AliasManager *aliasManager = new AliasManager();
+	aliasManager->consult("files/prelude.alias");
+
 	Parser *parser = new Parser(toExecute);
 	if (parser->parse()) {
 		parser->postProcess();
 
-		ChurchNumerator *numerator = new ChurchNumerator(parser->syntaxTree);
+		ChurchNumerator *numerator = new ChurchNumerator(parser->syntaxTree, aliasManager);
 		numerator->dechurch();
 		numerator->printTree();
 	} else
 		cout << "ERROR: Syntax is wrong" << endl;
+}
+
+void Tester::testNumericOperations() {
+//	string command("(((5 + (10 - 5)) ^ 2) * (10 * (5 - 4)))");
+//	string command("(10 * (10 * 1))");
+//	string command("(10 - (10 * 1))");
+	string command("(10 + (10 - 1))");
+	cout << "> " << command << endl;
+
+	char *toExecute = (char*) malloc(strlen(command.c_str()) + 1);
+	strcpy(toExecute, command.c_str());
+
+	AliasManager *aliasManager = new AliasManager();
+	aliasManager->consult("files/prelude.alias");
+
+	Parser *parser = new Parser(toExecute);
+	if (parser->parse()) {
+		parser->postProcess();
+
+		parser->printSyntaxTree();
+
+		ChurchNumerator *numerator = new ChurchNumerator(parser->syntaxTree, aliasManager);
+		numerator->enchurch();
+
+		parser->printSyntaxTree();
+
+		Evaluator *evaluator = new Evaluator(parser->syntaxTree);
+		free(evaluator->evaluate());
+		numerator->dechurch();
+
+		parser->printSyntaxTree();
+
+		toExecute = parser->syntaxTree->toCommand();
+		assert(strcmp(toExecute, "1000") == 0);
+	} else
+		cout << "ERROR: Syntax is wrong" << endl;
+}
+
+void Tester::globalTest() {
+//	this->testCalculator();
+//	this->testParser();
+	this->testEvaluator();
 }

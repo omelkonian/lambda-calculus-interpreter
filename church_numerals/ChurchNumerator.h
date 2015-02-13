@@ -10,11 +10,13 @@
 
 #include "../abstract_syntax_tree/AST.h"
 #include "../abstract_syntax_tree/InternalNode.h"
+#include "../alias_manager/AliasManager.h"
 
 class ChurchNumerator {
-	AST *syntaxTree;
+	AliasManager *aliasManager;
 public:
-	ChurchNumerator(AST *syntaxTree);
+	AST *syntaxTree;
+	ChurchNumerator(AST *syntaxTree, AliasManager *aliasManager);
 	virtual ~ChurchNumerator();
 
 	void enchurch();
@@ -24,6 +26,7 @@ public:
 
 private:
 	InternalNode *constructChurchNumeral(int number);
+	InternalNode *termToNode(string term);
 
 };
 

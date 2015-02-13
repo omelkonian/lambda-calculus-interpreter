@@ -23,6 +23,7 @@
 #include "evaluator/Evaluator.h"
 #include "error_handler/AutoCorrector.h"
 #include "alias_manager/AliasManager.h"
+#include "church_numerals/ChurchNumerator.h"
 
 using namespace std;
 
@@ -35,7 +36,7 @@ int main() {
 	// ((\x. (\y. x)) (\z. z))
 	// ((\x. x) (\y. y))
 	// ((\x. x) ((\y. y) (\z. z)))
-	bool runTest = true;
+	bool runTest = false;
 
 	if (runTest) {
 		Tester *tester = new Tester();
@@ -52,7 +53,8 @@ int main() {
 //		tester->testStringManipulation();
 //		tester->testAliasing();
 //		tester->testEnchurch();
-		tester->testDechurch();
+//		tester->testDechurch();
+		tester->testNumericOperations();
 
 
 //		tester->globalTest();
@@ -76,8 +78,6 @@ int main() {
 		aliasManager->consult("files/prelude.alias");
 
 		string command2(command);
-	//	string command("((false x1) x2)");
-	//	string command("(false false)");
 
 		command2 = aliasManager->translate(command2);
 
@@ -89,11 +89,31 @@ int main() {
 		if (parser->parse()) {
 			parser->postProcess();
 
-			parser->printSyntaxTree();
+			ChurchNumerator *numerator = new ChurchNumerator(parser->syntaxTree, aliasManager);
+			numerator->enchurch();
+
+			char *command = parser->syntaxTree->toCommand();
+			delete parser->syntaxTree;
+			delete parser;
+			string commandStr(command);
+			string newCommandStr = aliasManager->translate(commandStr);
+			free(command);
+			char *newCommand = (char*) newCommandStr.c_str();
+
+			parser = new Parser(newCommand);
+			parser->parse();
+			parser->postProcess();
 
 			Evaluator *evaluator = new Evaluator(parser->syntaxTree);
-			toExecute = evaluator->evaluate();
+			evaluator->evaluate();
+
+			numerator->syntaxTree = parser->syntaxTree;
+			numerator->dechurch();
+
+			toExecute = parser->syntaxTree->toCommand();
+
 			cout << "FINAL: " << toExecute << endl;
+			free(toExecute);
 		}
 		else
 			cout << "ERROR: Syntax is wrong" << endl;

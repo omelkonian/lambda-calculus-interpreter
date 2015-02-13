@@ -34,7 +34,6 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 
 	bool succeeded = true;
 	if (file.is_open()) {
-		cout << "Successfully opened " << this->filename << endl;
 		char data[MAX_COMMAND_LENGTH];
 
 		string line;
@@ -61,7 +60,6 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 				ch = lineStream.get();
 			}
 			term[cur] = '\0';
-//			cout << "Term: " << term << endl;
 
 			bool isValidTerm = this->checkTerm(term);
 			if (!isValidTerm) {
@@ -93,7 +91,6 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 			free(terms[i]);
 		}
 	}
-	cout << "consulted" << endl;
 }
 
 bool Consultor::checkTerm(char* term) {
