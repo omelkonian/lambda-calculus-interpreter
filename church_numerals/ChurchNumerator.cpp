@@ -89,7 +89,6 @@ void ChurchNumerator::enchurch() {
 			cout << "INVALID NUMBER OF CHILDREN IN NUM_EXP" << endl;
 
 	}
-	cout << "ENCHURCHED" << endl;
 }
 
 void ChurchNumerator::dechurch() {

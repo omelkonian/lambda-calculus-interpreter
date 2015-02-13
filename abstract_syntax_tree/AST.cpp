@@ -257,9 +257,9 @@ void AST::etaConversionExists1(Node* node, bool* found) {
 InternalNode* AST::substitute(InternalNode *node) {
 	assert(node->type == APPLICATION);
 
-#ifdef EAGER_EVALUATION
-
-#endif
+	if (EAGER_EVALUATION) {
+	// TODO Eager Evaluation
+	}
 
 	InternalNode *toInsert = (InternalNode*) node->children[2];
 	InternalNode *insertTo = ((InternalNode*) node->children[1]);

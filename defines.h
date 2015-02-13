@@ -15,6 +15,7 @@
 #define MAX_ERROR_MESSAGE_LENGTH 50
 
 // EVALUATION
-#define EAGER_EVALUATION
+extern bool EAGER_EVALUATION;
+extern bool TRACE;
 
 #endif /* LCI_DEFINES_H_ */

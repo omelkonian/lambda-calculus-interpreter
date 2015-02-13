@@ -24,10 +24,17 @@
 #include "error_handler/AutoCorrector.h"
 #include "alias_manager/AliasManager.h"
 #include "church_numerals/ChurchNumerator.h"
+#include "system_commands/SystemCommandManager.h"
 
 using namespace std;
 
+bool EAGER_EVALUATION;
+bool TRACE;
+
 int main() {
+	EAGER_EVALUATION = true;
+	TRACE = true;
+
 	// (\x. ((\z. ((k l) m)) x))
 	// (((\x. ((x x) y)) (\x. ((x x) y))) y)
 	// ((\x. (\y. ((z x) y))) (w y))
@@ -56,10 +63,14 @@ int main() {
 //		tester->testDechurch();
 		tester->testNumericOperations();
 
-
 //		tester->globalTest();
 		return 0;
 	}
+
+	AliasManager *aliasManager = new AliasManager();
+	aliasManager->consult("files/prelude.alias");
+
+	SystemCommandManager *systemCommandManager = new SystemCommandManager(aliasManager);
 
 	while (true) {
 		char * command = readline("> ");
@@ -74,49 +85,49 @@ int main() {
 			break;
 		}
 
-		AliasManager *aliasManager = new AliasManager();
-		aliasManager->consult("files/prelude.alias");
-
 		string command2(command);
 
-		command2 = aliasManager->translate(command2);
+		if (command2[0] == ':')
+			systemCommandManager->execute(command2);
+		else {
 
-		char *toExecute = (char*) malloc(strlen(command2.c_str()) + 1);
-		strcpy(toExecute, command2.c_str());
-		cout << "toExecute: " << toExecute << endl;
+			command2 = aliasManager->translate(command2);
 
-		Parser *parser = new Parser(toExecute);
-		if (parser->parse()) {
-			parser->postProcess();
+			char *toExecute = (char*) malloc(strlen(command2.c_str()) + 1);
+			strcpy(toExecute, command2.c_str());
 
-			ChurchNumerator *numerator = new ChurchNumerator(parser->syntaxTree, aliasManager);
-			numerator->enchurch();
+			Parser *parser = new Parser(toExecute);
+			if (parser->parse()) {
+				parser->postProcess();
 
-			char *command = parser->syntaxTree->toCommand();
-			delete parser->syntaxTree;
-			delete parser;
-			string commandStr(command);
-			string newCommandStr = aliasManager->translate(commandStr);
-			free(command);
-			char *newCommand = (char*) newCommandStr.c_str();
+				ChurchNumerator *numerator = new ChurchNumerator(parser->syntaxTree, aliasManager);
+				numerator->enchurch();
 
-			parser = new Parser(newCommand);
-			parser->parse();
-			parser->postProcess();
+				char *command = parser->syntaxTree->toCommand();
+				delete parser->syntaxTree;
+				delete parser;
+				string commandStr(command);
+				string newCommandStr = aliasManager->translate(commandStr);
+				free(command);
+				char *newCommand = (char*) newCommandStr.c_str();
 
-			Evaluator *evaluator = new Evaluator(parser->syntaxTree);
-			evaluator->evaluate();
+				parser = new Parser(newCommand);
+				parser->parse();
+				parser->postProcess();
 
-			numerator->syntaxTree = parser->syntaxTree;
-			numerator->dechurch();
+				Evaluator *evaluator = new Evaluator(parser->syntaxTree);
+				evaluator->evaluate();
 
-			toExecute = parser->syntaxTree->toCommand();
+				numerator->syntaxTree = parser->syntaxTree;
+				numerator->dechurch();
 
-			cout << "FINAL: " << toExecute << endl;
-			free(toExecute);
+				toExecute = parser->syntaxTree->toCommand();
+
+				cout << "=> " << toExecute << endl;
+				free(toExecute);
+			} else
+				cout << "ERROR: Syntax is wrong" << endl;
 		}
-		else
-			cout << "ERROR: Syntax is wrong" << endl;
 		free(command);
 	}
 }
