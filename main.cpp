@@ -32,9 +32,13 @@ bool EAGER_EVALUATION;
 bool TRACE;
 
 int main() {
-	EAGER_EVALUATION = true;
+	EAGER_EVALUATION = false;
 	TRACE = true;
 
+
+	// ((\f. ((\x. (f (x x))) (\x. (f (x x))))) (\f. (\n. (((cond (IsZero n)) base) (f (pred n)))))
+	// ((\f. (f (f y))) ((\x. x) (\x. x)))
+	// ((\y. z) ((\x. (x x)) (\x. (x x))))
 	// (\x. ((\z. ((k l) m)) x))
 	// (((\x. ((x x) y)) (\x. ((x x) y))) y)
 	// ((\x. (\y. ((z x) y))) (w y))
@@ -91,7 +95,9 @@ int main() {
 			systemCommandManager->execute(command2);
 		else {
 
+			cout << "BEFORE_TRANSLATE: " << command2 << endl;
 			command2 = aliasManager->translate(command2);
+			cout << "AFTER_TRANSLATE: " << command2 << endl;
 
 			char *toExecute = (char*) malloc(strlen(command2.c_str()) + 1);
 			strcpy(toExecute, command2.c_str());

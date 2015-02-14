@@ -29,3 +29,5 @@ snd  := (\z. (z false));
 
 % COMBINATORS
 Y := (\f. ((\x. (f (x x))) (\x. (f (x x)))));
+
+recur := (\n. (((cond (IsZero n)) base) (recur (pred n))));

@@ -9,6 +9,7 @@
 #define EVALUATOR_EVALUATOR_H_
 
 #include "../abstract_syntax_tree/AST.h"
+#include <string>
 
 class Evaluator {
 	AST *syntaxTree;

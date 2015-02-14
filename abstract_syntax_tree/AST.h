@@ -53,6 +53,7 @@ public:
 	// Returns the free variables of a term.
 	std::vector<char*> freeVariables(InternalNode *node);
 
+
 	InternalNode* getFirstApplication();
 	InternalNode* getEtaNode();
 

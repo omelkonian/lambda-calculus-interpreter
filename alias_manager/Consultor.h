@@ -22,6 +22,8 @@ public:
 
 private:
 	bool checkTerm(char *term);
+	bool hasRecursion(string variable, string term);
+	string ReplaceString(string subject, const string& search, const string& replace);
 };
 
 #endif /* ALIAS_MANAGER_CONSULTOR_H_ */

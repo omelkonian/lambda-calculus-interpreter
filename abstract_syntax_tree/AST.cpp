@@ -9,6 +9,7 @@
 #include "InternalNode.h"
 #include "Leaf.h"
 #include "../defines.h"
+#include "../evaluator/Evaluator.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -257,12 +258,35 @@ void AST::etaConversionExists1(Node* node, bool* found) {
 InternalNode* AST::substitute(InternalNode *node) {
 	assert(node->type == APPLICATION);
 
-	if (EAGER_EVALUATION) {
-	// TODO Eager Evaluation
-	}
 
 	InternalNode *toInsert = (InternalNode*) node->children[2];
 	InternalNode *insertTo = ((InternalNode*) node->children[1]);
+
+	if (EAGER_EVALUATION) {
+		// Bring argument to canonical form.
+		bool changed = false;
+		if (TRACE) {
+			TRACE = false;
+			changed = true;
+		}
+
+		InternalNode *newSubtree = toInsert->getNewByCopy();
+		AST *subtree = new AST(newSubtree);
+		Evaluator *eval = new Evaluator(subtree);
+		free(eval->evaluate());
+		newSubtree = (InternalNode*) subtree->getRoot();
+		subtree->setRoot(NULL);
+		delete eval;
+		this->replace(toInsert, newSubtree);
+		toInsert = newSubtree;
+
+		if (changed) {
+			char *newCommand = this->toCommand();
+			cout << "-> " << newCommand << endl;
+			free(newCommand);
+			TRACE = true;
+		}
+	}
 
 	this->substitute1((InternalNode*) insertTo->children[2], toInsert, ((Leaf*) insertTo->children[1])->token->value->value.string);
 

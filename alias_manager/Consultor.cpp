@@ -24,7 +24,6 @@ Consultor::Consultor(const char *filename) {
 }
 
 Consultor::~Consultor() {
-	// TODO Auto-generated destructor stub
 }
 
 void Consultor::getStatements(AliasManager *aliasManager) {
@@ -68,6 +67,24 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 				break;
 			}
 
+			// If recursion occurs, edit the command using the Y-combinator.
+			string variable(alias);
+			string termStr(term);
+			if (this->hasRecursion(variable, termStr)) {
+				string finalTerm("(");
+				string Y_combinator("(\\f. ((\\x. (f (x x))) (\\x. (f (x x)))))");
+				finalTerm.append(Y_combinator);
+				finalTerm.append(" (\\f. ");
+				termStr = this->ReplaceString(termStr, alias, "f");
+				finalTerm.append(termStr);
+				finalTerm.append("))");
+
+				term = (char*) realloc(term, strlen(finalTerm.c_str()) + 1);
+				strcpy(term, finalTerm.c_str());
+			}
+
+
+
 			aliases.push_back(alias);
 			terms.push_back(term);
 
@@ -98,4 +115,17 @@ bool Consultor::checkTerm(char* term) {
 	bool ret = parser->parse();
 	delete parser;
 	return ret;
+}
+
+bool Consultor::hasRecursion(string variable, string term) {
+	return !(term.find(variable) == term.npos);
+}
+
+string Consultor::ReplaceString(string subject, const string& search, const string& replace) {
+    size_t pos = 0;
+    while ((pos = subject.find(search, pos)) != std::string::npos) {
+         subject.replace(pos, search.length(), replace);
+         pos += replace.length();
+    }
+    return subject;
 }

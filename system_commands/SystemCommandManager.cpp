@@ -62,7 +62,7 @@ void SystemCommandManager::execute(string command) {
 
 		if (flag.compare("ON") == 0)
 			EAGER_EVALUATION = true;
-		else if (flag.compare("OFF") == 0)
+		else if (flag.compare("OF") == 0)
 			EAGER_EVALUATION = false;
 	}
 	else if (command.substr(1, 7).compare("consult") == 0) {
