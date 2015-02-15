@@ -28,13 +28,17 @@ public:
 	map<string, string> getOperatorMap();
 
 	void consult(const char *file);
+
 	string deAlias(string name);
 	string deAliasOp(string name);
 	void addAlias(string translateTo, string toTranslate);
 	void addOperator(string translateTo, string toTranslate);
+
 	string translate(string command);
+	string deTranslate(string command);
 
 	void printAliases();
+	void printOperators();
 
 private:
 	string translate1(string command);

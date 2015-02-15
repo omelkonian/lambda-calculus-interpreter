@@ -50,7 +50,7 @@ string AliasManager::deAlias(string name) {
 			return found;
 		}
 	}
-	return string("");
+	return string("NOT FOUND");
 }
 
 string AliasManager::deAliasOp(string name) {
@@ -87,6 +87,19 @@ string AliasManager::translate1(string command) {
 	}
 
 	return this->replace(command, replacements);
+}
+
+string AliasManager::deTranslate(string command) {
+	for (map<string, string>::iterator it = this->aliasMap.begin(); it != this->aliasMap.end(); ++it) {
+		string alias = it->first;
+		string deAlias = it->second;
+
+		if (command.find(deAlias) != command.npos) {
+			command = Consultor::ReplaceString(command, deAlias, alias);
+			it = this->aliasMap.begin();
+		}
+	}
+	return command;
 }
 
 string AliasManager::replace(string command, vector<replaceTuple> replacements) {
@@ -158,10 +171,19 @@ vector<Variable*> AliasManager::getVariables(const char *command) {
 }
 
 void AliasManager::printAliases() {
-	for (map<string, string>::iterator it = this->aliasMap.begin(); it != this->aliasMap.end(); ++it)
-		cout << it->first << " => " << it->second << '\n';
+	for (map<string, string>::iterator it = this->aliasMap.begin(); it != this->aliasMap.end(); ++it) {
+		cerr << "\33[0;36m" << it->first << "\33[0m";
+		cout << " => " << it->second << '\n';
+	}
 }
 
 map<string, string> AliasManager::getOperatorMap() {
 	return this->operatorMap;
+}
+
+void AliasManager::printOperators() {
+	for (map<string, string>::iterator it = this->operatorMap.begin(); it != this->operatorMap.end(); ++it) {
+		cerr << "\33[0;36bm" << it->first << "\33[0m";
+		cout << " => " << it->second << '\n';
+	}
 }

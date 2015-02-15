@@ -39,8 +39,9 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 		char data[MAX_COMMAND_LENGTH];
 
 		string line;
-		int lineCount = 1;
+		int lineCount = 0;
 		while (getline(file, line)) {
+			lineCount++;
 			stringstream lineStream(line);
 
 			if (line.empty() || line[0] == '%' || line[0] == 13)
@@ -74,6 +75,7 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 			string variable(alias);
 			string termStr(term);
 			if (this->hasRecursion(variable, termStr)) {
+				cout << alias << "HAS RECURSION!" << endl;
 				string finalTerm("(");
 				string Y_combinator("(\\f. ((\\x. (f (x x))) (\\x. (f (x x)))))");
 				finalTerm.append(Y_combinator);
@@ -95,8 +97,6 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 				aliases.push_back(alias);
 				terms.push_back(term);
 			}
-
-			lineCount++;
 		}
 	} else
 		cout << "ERROR: Unable to open " << file << endl;
@@ -142,7 +142,13 @@ bool Consultor::checkTerm(char* term) {
 }
 
 bool Consultor::hasRecursion(string variable, string term) {
-	return !(term.find(variable) == term.npos);
+	int index = term.find(variable);
+	if (index != (int) term.npos) {
+		bool spaceBefore = (index > 0) ? (term[index - 1] == 32 || term[index - 1] == '(') : (true);
+		bool spaceAfter = (index < (int)term.size()) ? (term[index + 1] == 32 || term[index + 1] == ')') : (true);
+		return (spaceAfter && spaceBefore);
+	}
+	return false;
 }
 
 string Consultor::ReplaceString(string subject, const string& search, const string& replace) {

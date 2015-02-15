@@ -275,35 +275,35 @@ void Tester::testAutocorrectorRT() {
 void Tester::testEvaluatorRT() {
 	cout << "___________Testing Evaluator Real-Time___________" << endl;
 
-	while (true) {
-		char * command = readline("> ");
-		if (!command)
-			break;
-		if (strlen(command) == 0)
-			continue;
-		if (*command)
-			add_history(command);
-		if (strcmp(command, "quit") == 0) {
-			free(command);
-			break;
-		}
-
-		AutoCorrector *ac = new AutoCorrector(command);
-		command = ac->autoCorrect();
-
-		Parser *parser = new Parser(command);
-		parser->parse();
-		parser->postProcess();
-
-		parser->printSyntaxTree();
-
-		Evaluator *eval = new Evaluator(parser->syntaxTree);
-		char *finalCommand = eval->evaluate();
-
-		cout << "FINAL: " << finalCommand << endl;
-
-		free(command);
-	}
+//	while (true) {
+//		char * command = readline("> ");
+//		if (!command)
+//			break;
+//		if (strlen(command) == 0)
+//			continue;
+//		if (*command)
+//			add_history(command);
+//		if (strcmp(command, "quit") == 0) {
+//			free(command);
+//			break;
+//		}
+//
+//		AutoCorrector *ac = new AutoCorrector(command);
+//		command = ac->autoCorrect();
+//
+//		Parser *parser = new Parser(command);
+//		parser->parse();
+//		parser->postProcess();
+//
+//		parser->printSyntaxTree();
+//
+//		Evaluator *eval = new Evaluator(parser->syntaxTree);
+//		char *finalCommand = eval->evaluate();
+//
+//		cout << "FINAL: " << finalCommand << endl;
+//
+//		free(command);
+//	}
 }
 
 void Tester::testVariablePool() {
@@ -352,16 +352,16 @@ void Tester::testEvaluator() {
 	for (int i = 0; i < commands; i++) {
 		cout << "> " << command[i] << endl;
 
-		Parser *parser = new Parser(command[i]);
-		assert(parser->parse());
-		parser->postProcess();
-
-		Evaluator *evaluator = new Evaluator(parser->syntaxTree);
-
-		command[i] = evaluator->evaluate();
-
-		delete parser;
-		delete evaluator;
+//		Parser *parser = new Parser(command[i]);
+//		assert(parser->parse());
+//		parser->postProcess();
+//
+//		Evaluator *evaluator = new Evaluator(parser->syntaxTree);
+//
+//		command[i] = evaluator->evaluate();
+//
+//		delete parser;
+//		delete evaluator;
 	}
 
 	for (int i = 0; i < commands; i++) {
@@ -403,7 +403,7 @@ void Tester::testAliasing() {
 	if (parser->parse()) {
 		parser->postProcess();
 
-		Evaluator *evaluator = new Evaluator(parser->syntaxTree);
+		Evaluator *evaluator = new Evaluator(parser->syntaxTree, aliasManager);
 		toExecute = evaluator->evaluate();
 		cout << "FINAL: " << toExecute << endl;
 	} else
@@ -430,7 +430,7 @@ void Tester::testEnchurch() {
 
 		cout << parser->syntaxTree->toCommand() << endl;
 
-		Evaluator *evaluator = new Evaluator(parser->syntaxTree);
+		Evaluator *evaluator = new Evaluator(parser->syntaxTree, aliasManager);
 		toExecute = evaluator->evaluate();
 	} else
 		cout << "ERROR: Syntax is wrong" << endl;
@@ -482,7 +482,7 @@ void Tester::testNumericOperations() {
 
 		parser->printSyntaxTree();
 
-		Evaluator *evaluator = new Evaluator(parser->syntaxTree);
+		Evaluator *evaluator = new Evaluator(parser->syntaxTree, aliasManager);
 		free(evaluator->evaluate());
 		numerator->dechurch();
 

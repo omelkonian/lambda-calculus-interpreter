@@ -272,7 +272,7 @@ InternalNode* AST::substitute(InternalNode *node) {
 
 		InternalNode *newSubtree = toInsert->getNewByCopy();
 		AST *subtree = new AST(newSubtree);
-		Evaluator *eval = new Evaluator(subtree);
+		Evaluator *eval = new Evaluator(subtree, NULL);
 		free(eval->evaluate());
 		newSubtree = (InternalNode*) subtree->getRoot();
 		subtree->setRoot(NULL);

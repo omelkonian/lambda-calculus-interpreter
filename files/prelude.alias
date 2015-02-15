@@ -19,8 +19,11 @@ exp  := (\m. (\n. (n m)));
 
 % ---------------ARITHMETIC PREDICATES---------------
 IsZero := (\n. ((n (\x. false)) true));
-LEQ    := (\m. (\n. (IsZero ((minus m) n))));
-EQ     := (\m. (\n. ((and ((LEQ m) n)) ((LEQ n) m))));
+EQ     := (\m. (\n. ((and (IsZero ((sub m) n))) (IsZero ((sub n) m))) ));
+LEQ    := (\m. (\n. (IsZero ((sub m) n))));
+LE     := (\m. (\n. ((and (not ((EQ m) n))) ((LEQ m) n))));
+GR	   := (\m. (\n. (not ((LEQ m) n))));
+GEQ   := (\m. (\n. (not ((LE m) n))));
 
 % ---------------PAIR---------------
 pair := (\x. (\y. (\t. ((t x) y))));
@@ -39,7 +42,21 @@ tail  := (\z. (snd (snd z)));
 
 &== := EQ;
 &!= := (not EQ);
+&<  := LE;
+&<= := LEQ;
+&>  := GR;
+&>= := GEQ;
+&&& := and;
+&|| := or;
+&!  := not;
 
+&+  := add;
+&-  := sub;
+&*  := mul;
+&^  := exp;
+
+&,  := pair;
+&:  := cons;
 
 % ---------------LIST OPERATIONS---------------
 

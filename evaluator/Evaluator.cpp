@@ -15,8 +15,9 @@
 
 using namespace std;
 
-Evaluator::Evaluator(AST *syntaxTree) {
+Evaluator::Evaluator(AST *syntaxTree, AliasManager *aliasManager) {
 	this->syntaxTree = syntaxTree;
+	this->aliasManager = aliasManager;
 }
 
 Evaluator::~Evaluator() {
@@ -58,7 +59,9 @@ char* Evaluator::evaluate() {
 
 		if (TRACE) {
 			char *newCommand = this->syntaxTree->toCommand();
-			cout << "-> " << newCommand << endl;
+			cerr << "\33[0;32m" << "->" << "\33[0m";
+			string command(newCommand);
+			cout << this->aliasManager->deTranslate(command) << endl;
 			free(newCommand);
 		}
 	}
