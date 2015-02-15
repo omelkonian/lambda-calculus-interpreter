@@ -19,14 +19,19 @@ typedef pair<string, Range*> replaceTuple;
 
 class AliasManager {
 	map<string, string> aliasMap;
-	vector<string> files;
+	map<string, string> operatorMap;
+ 	vector<string> files;
 public:
 	AliasManager();
 	virtual ~AliasManager();
 
+	map<string, string> getOperatorMap();
+
 	void consult(const char *file);
 	string deAlias(string name);
+	string deAliasOp(string name);
 	void addAlias(string translateTo, string toTranslate);
+	void addOperator(string translateTo, string toTranslate);
 	string translate(string command);
 
 	void printAliases();

@@ -25,6 +25,7 @@
 #include "alias_manager/AliasManager.h"
 #include "church_numerals/ChurchNumerator.h"
 #include "system_commands/SystemCommandManager.h"
+#include "operators/OperatorManager.h"
 
 using namespace std;
 
@@ -74,6 +75,8 @@ int main() {
 	AliasManager *aliasManager = new AliasManager();
 	aliasManager->consult("files/prelude.alias");
 
+	OperatorManager *operatorManager = new OperatorManager(aliasManager);
+
 	SystemCommandManager *systemCommandManager = new SystemCommandManager(aliasManager);
 
 	while (true) {
@@ -95,9 +98,11 @@ int main() {
 			systemCommandManager->execute(command2);
 		else {
 
-			cout << "BEFORE_TRANSLATE: " << command2 << endl;
+			command2 = operatorManager->translate(command2);
+
+//			cout << "BEFORE_TRANSLATE: " << command2 << endl;
 			command2 = aliasManager->translate(command2);
-			cout << "AFTER_TRANSLATE: " << command2 << endl;
+//			cout << "AFTER_TRANSLATE: " << command2 << endl;
 
 			char *toExecute = (char*) malloc(strlen(command2.c_str()) + 1);
 			strcpy(toExecute, command2.c_str());

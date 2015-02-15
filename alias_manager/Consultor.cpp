@@ -31,6 +31,9 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 	vector<char*> aliases;
 	vector<char*> terms;
 
+	vector<char*> operators;
+	vector<char*> opTerms;
+
 	bool succeeded = true;
 	if (file.is_open()) {
 		char data[MAX_COMMAND_LENGTH];
@@ -83,10 +86,15 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 				strcpy(term, finalTerm.c_str());
 			}
 
-
-
-			aliases.push_back(alias);
-			terms.push_back(term);
+			if (alias[0] == '&') {
+				for (int i = 0; i < (int)strlen(alias); i++)
+					alias[i] = alias[i + 1];
+				operators.push_back(alias);
+				opTerms.push_back(term);
+			} else {
+				aliases.push_back(alias);
+				terms.push_back(term);
+			}
 
 			lineCount++;
 		}
@@ -100,20 +108,36 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 			free(terms[i]);
 			free(aliases[i]);
 		}
-	}
-	else {
+		for (int i = 0; i < (int) operators.size(); i++) {
+			aliasManager->addOperator(string(opTerms[i]), string(operators[i]));
+			free(opTerms[i]);
+			free(operators[i]);
+		}
+	} else {
 		// Free memory
 		for (int i = 0; i < (int) aliases.size(); i++) {
 			free(aliases[i]);
 			free(terms[i]);
 		}
+		for (int i = 0; i < (int) operators.size(); i++) {
+			free(operators[i]);
+			free(opTerms[i]);
+		}
 	}
 }
 
 bool Consultor::checkTerm(char* term) {
-	Parser *parser = new Parser(term);
+	char *surround = (char*) malloc(strlen(term) + 3);
+	int i = 0;
+	surround[i] = '(';
+	while (i < (int)strlen(term)) surround[i + 1] = term[i++];
+	surround[++i] = ')';
+	surround[++i] = '\0';
+
+	Parser *parser = new Parser(surround);
 	bool ret = parser->parse();
 	delete parser;
+	free(surround);
 	return ret;
 }
 
@@ -122,10 +146,10 @@ bool Consultor::hasRecursion(string variable, string term) {
 }
 
 string Consultor::ReplaceString(string subject, const string& search, const string& replace) {
-    size_t pos = 0;
-    while ((pos = subject.find(search, pos)) != std::string::npos) {
-         subject.replace(pos, search.length(), replace);
-         pos += replace.length();
-    }
-    return subject;
+	size_t pos = 0;
+	while ((pos = subject.find(search, pos)) != std::string::npos) {
+		subject.replace(pos, search.length(), replace);
+		pos += replace.length();
+	}
+	return subject;
 }

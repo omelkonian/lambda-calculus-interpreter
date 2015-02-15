@@ -53,6 +53,16 @@ string AliasManager::deAlias(string name) {
 	return string("");
 }
 
+string AliasManager::deAliasOp(string name) {
+	for (map<string, string>::iterator it = this->operatorMap.begin(); it != this->operatorMap.end(); ++it) {
+		if (name.compare(it->first) == 0) {
+			string found(it->second);
+			return found;
+		}
+	}
+	return string("");
+}
+
 string AliasManager::translate(string command) {
 	string ret(command);
 	ret = this->translate1(ret);
@@ -89,6 +99,10 @@ string AliasManager::replace(string command, vector<replaceTuple> replacements) 
 
 void AliasManager::addAlias(string translateTo, string toTranslate) {
 	this->aliasMap[toTranslate] = translateTo;
+}
+
+void AliasManager::addOperator(string translateTo, string toTranslate) {
+	this->operatorMap[toTranslate] = translateTo;
 }
 
 vector<Variable*> AliasManager::getVariables(const char *command) {
@@ -146,4 +160,8 @@ vector<Variable*> AliasManager::getVariables(const char *command) {
 void AliasManager::printAliases() {
 	for (map<string, string>::iterator it = this->aliasMap.begin(); it != this->aliasMap.end(); ++it)
 		cout << it->first << " => " << it->second << '\n';
+}
+
+map<string, string> AliasManager::getOperatorMap() {
+	return this->operatorMap;
 }
