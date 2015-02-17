@@ -50,7 +50,7 @@ string AliasManager::deAlias(string name) {
 			return found;
 		}
 	}
-	return string("NOT FOUND");
+	return string("");
 }
 
 string AliasManager::deAliasOp(string name) {

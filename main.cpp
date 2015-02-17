@@ -26,6 +26,7 @@
 #include "church_numerals/ChurchNumerator.h"
 #include "system_commands/SystemCommandManager.h"
 #include "operators/OperatorManager.h"
+#include "list/ListManager.h"
 
 using namespace std;
 
@@ -76,6 +77,7 @@ int main() {
 	aliasManager->consult("files/prelude.alias");
 
 	OperatorManager *operatorManager = new OperatorManager(aliasManager);
+	ListManager *listManager = new ListManager(aliasManager);
 
 	SystemCommandManager *systemCommandManager = new SystemCommandManager(aliasManager);
 
@@ -98,6 +100,8 @@ int main() {
 			systemCommandManager->execute(command2);
 		else {
 
+//			command2 = listManager->translate(command2);
+
 			command2 = operatorManager->translate(command2);
 
 //			cout << "BEFORE_TRANSLATE: " << command2 << endl;
@@ -114,19 +118,19 @@ int main() {
 				ChurchNumerator *numerator = new ChurchNumerator(parser->syntaxTree, aliasManager);
 				numerator->enchurch();
 
-				char *command = parser->syntaxTree->toCommand();
-				delete parser->syntaxTree;
-				delete parser;
-				string commandStr(command);
-				string newCommandStr = aliasManager->translate(commandStr);
-				free(command);
-				char *newCommand = (char*) newCommandStr.c_str();
+//				char *command = parser->syntaxTree->toCommand();
+//				delete parser->syntaxTree;
+//				delete parser;
+//				string commandStr(command);
+//				string newCommandStr = aliasManager->translate(commandStr);
+//				free(command);
+//				char *newCommand = (char*) newCommandStr.c_str();
+//
+//				parser = new Parser(newCommand);
+//				parser->parse();
+//				parser->postProcess();
 
-				parser = new Parser(newCommand);
-				parser->parse();
-				parser->postProcess();
-
-				Evaluator *evaluator = new Evaluator(parser->syntaxTree);
+				Evaluator *evaluator = new Evaluator(parser->syntaxTree, aliasManager);
 				evaluator->evaluate();
 
 				numerator->syntaxTree = parser->syntaxTree;
@@ -134,7 +138,13 @@ int main() {
 
 				toExecute = parser->syntaxTree->toCommand();
 
-				cout << "=> " << toExecute << endl;
+				cerr << "\33[0;31m" << "=>" << "\33[0m";
+				cout << toExecute << endl;
+
+				string finalCommand(toExecute);
+				finalCommand = aliasManager->deTranslate(finalCommand);
+				cerr << "\33[0;31m" << "==>" << "\33[0m";
+				cout << finalCommand << endl;
 				free(toExecute);
 			} else
 				cout << "ERROR: Syntax is wrong" << endl;
