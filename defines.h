@@ -18,4 +18,7 @@
 extern bool EAGER_EVALUATION;
 extern bool TRACE;
 
+// LIST
+extern bool LIST_RESULT;
+
 #endif /* LCI_DEFINES_H_ */

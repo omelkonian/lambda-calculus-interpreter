@@ -51,6 +51,9 @@ public:
 	void testDechurch();
 	void testNumericOperations();
 
+	// LIST
+	void testListChecker();
+
 
 
 

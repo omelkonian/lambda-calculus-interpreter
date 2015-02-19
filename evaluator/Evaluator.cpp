@@ -6,6 +6,7 @@
  */
 
 #include "Evaluator.h"
+#include "../scanner/Scanner.h"
 #include "../defines.h"
 #include <assert.h>
 #include <stdio.h>
@@ -29,6 +30,21 @@ char* Evaluator::evaluate() {
 	bool etaExists = this->syntaxTree->etaConversionExists();
 	while (betaExists || etaExists) {
 		if (betaExists) {
+			cout << "BETA!" << endl;
+			// Check if result is list
+			char *newCommand = this->syntaxTree->toCommand();
+			string command(newCommand);
+			free(newCommand);
+			command = this->aliasManager->deTranslate(command);
+			cout << "Is " << command << " a list?" << endl;
+
+			if (this->isList(command)) {
+				cout << "IS A LIST" << endl;
+				LIST_RESULT = true;
+				break;
+			}
+			cout << "Nope" << endl;
+
 			// Execute leftmost application (lazy evaluation)
 			InternalNode *nextApplication = this->syntaxTree->getFirstApplication();
 			InternalNode *parent = this->syntaxTree->getParent(nextApplication);
@@ -48,8 +64,8 @@ char* Evaluator::evaluate() {
 					assert(i != (int ) (parent->children.size() - 1));
 				}
 			}
-		}
-		else if (etaExists) {
+		} else if (etaExists) {
+			cout << "ETA!" << endl;
 			InternalNode *nextEta = this->syntaxTree->getEtaNode();
 			this->syntaxTree->eta_convert(nextEta);
 		}
@@ -67,4 +83,51 @@ char* Evaluator::evaluate() {
 	}
 
 	return this->syntaxTree->toCommand();
+}
+
+bool Evaluator::isList(string term) {
+	int index = 0;
+	string tmp;
+	if (term.compare("nil") == 0)
+		return true;
+	while (index < (int) term.size()) {
+		// 1. Get "((cons "
+		tmp = term.substr(index, 7);
+		if (!((index < (int) term.size()) && (tmp.compare("((cons ") == 0)))
+			return false;
+		index += 7;
+		// 2. Get nested term
+		while (term[index] == 32) {
+			index++;
+			if (index >= (int) term.size()) return false;
+		}
+		if (term[index] == '(') {
+			int parCount = 1;
+			index++;
+			while (true) {
+				if (index >= (int) term.size()) return false;
+				if (term[index] == ')') {
+					if (--parCount == 0) break;
+				}
+				if (term[index] == '(') parCount++;
+				index++;
+			}
+		}
+		else {
+			while (Scanner::isValidVarSymbol(term[index]) || Scanner::isValidDigit(term[index])) {
+				index++;
+				if (index >= (int) term.size()) return false;
+			}
+		}
+		// 3. Get ") "
+		if (term[index++] != ')') return false;
+		if (index >= (int) term.size()) return false;
+		index++;
+		// 4. break at nil
+		tmp = term.substr(index, 4);
+		if (tmp.compare(" nil") == 0) return true;
+
+		index++;
+	}
+	return false;
 }

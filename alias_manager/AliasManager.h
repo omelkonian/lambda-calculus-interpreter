@@ -12,8 +12,11 @@
 #include <map>
 #include <string>
 #include "Variable.h"
+#include "../operators/OperatorManager.h"
 
 using namespace std;
+
+class OperatorManager;
 
 typedef pair<string, Range*> replaceTuple;
 
@@ -22,6 +25,8 @@ class AliasManager {
 	map<string, string> operatorMap;
  	vector<string> files;
 public:
+ 	OperatorManager *operatorManager;
+
 	AliasManager();
 	virtual ~AliasManager();
 

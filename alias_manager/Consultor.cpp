@@ -28,13 +28,7 @@ Consultor::~Consultor() {
 
 void Consultor::getStatements(AliasManager *aliasManager) {
 	ifstream file(this->filename);
-	vector<char*> aliases;
-	vector<char*> terms;
 
-	vector<char*> operators;
-	vector<char*> opTerms;
-
-	bool succeeded = true;
 	if (file.is_open()) {
 		char data[MAX_COMMAND_LENGTH];
 
@@ -64,23 +58,25 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 			}
 			term[cur] = '\0';
 
-			bool isValidTerm = this->checkTerm(term);
+			string termStr(term);
+			termStr = aliasManager->operatorManager->translate(termStr);
+
+			bool isValidTerm = this->checkTerm((char*) termStr.c_str());
 			if (!isValidTerm) {
 				cout << "ERROR: Term of " << alias << " is syntactically wrong. (Line " << lineCount << ")" << endl;
-				succeeded = false;
+				free(term);
+				free(alias);
 				break;
 			}
 
 			// If recursion occurs, edit the command using the Y-combinator.
 			string variable(alias);
-			string termStr(term);
 			if (this->hasRecursion(variable, termStr)) {
-				cout << alias << "HAS RECURSION!" << endl;
 				string finalTerm("(");
 				string Y_combinator("(\\f. ((\\x. (f (x x))) (\\x. (f (x x)))))");
 				finalTerm.append(Y_combinator);
-				finalTerm.append(" (\\f. ");
-				termStr = this->ReplaceString(termStr, alias, "f");
+				finalTerm.append(" (\\g. ");
+				termStr = this->ReplaceString(termStr, alias, "g");
 				finalTerm.append(termStr);
 				finalTerm.append("))");
 
@@ -91,39 +87,14 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 			if (alias[0] == '&') {
 				for (int i = 0; i < (int)strlen(alias); i++)
 					alias[i] = alias[i + 1];
-				operators.push_back(alias);
-				opTerms.push_back(term);
-			} else {
-				aliases.push_back(alias);
-				terms.push_back(term);
-			}
+				aliasManager->addOperator(string(term), string(alias));
+			} else
+				aliasManager->addAlias(string(term), string(alias));
+			free(term);
+			free(alias);
 		}
 	} else
 		cout << "ERROR: Unable to open " << file << endl;
-
-	if (succeeded) {
-		// Update Alias Manager
-		for (int i = 0; i < (int) aliases.size(); i++) {
-			aliasManager->addAlias(string(terms[i]), string(aliases[i]));
-			free(terms[i]);
-			free(aliases[i]);
-		}
-		for (int i = 0; i < (int) operators.size(); i++) {
-			aliasManager->addOperator(string(opTerms[i]), string(operators[i]));
-			free(opTerms[i]);
-			free(operators[i]);
-		}
-	} else {
-		// Free memory
-		for (int i = 0; i < (int) aliases.size(); i++) {
-			free(aliases[i]);
-			free(terms[i]);
-		}
-		for (int i = 0; i < (int) operators.size(); i++) {
-			free(operators[i]);
-			free(opTerms[i]);
-		}
-	}
 }
 
 bool Consultor::checkTerm(char* term) {
@@ -145,7 +116,7 @@ bool Consultor::hasRecursion(string variable, string term) {
 	int index = term.find(variable);
 	if (index != (int) term.npos) {
 		bool spaceBefore = (index > 0) ? (term[index - 1] == 32 || term[index - 1] == '(') : (true);
-		bool spaceAfter = (index < (int)term.size()) ? (term[index + 1] == 32 || term[index + 1] == ')') : (true);
+		bool spaceAfter = (index < (int)term.size() - variable.size()) ? (term[index + variable.size()] == 32 || term[index + variable.size()] == ')') : (true);
 		return (spaceAfter && spaceBefore);
 	}
 	return false;

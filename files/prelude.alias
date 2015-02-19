@@ -59,11 +59,26 @@ tail  := (\z. (snd (snd z)));
 &:  := cons;
 
 % ---------------LIST OPERATIONS---------------
+length := (\l. (((cond (isnil l)) 0) (1 + (length (tail l)))));
+index  := (\n. (\l. (((cond (isZero n)) (head l)) ((index (pred n)) (tail l)))));
+member := (\n. (\l. (((cond (isnil l)) false) (((cond (n == (head l))) true) ((member n) (tail l))))));
+
+test := (\n. (n : nil));
+
+%htre   := (\n. (((cond (isZero n)) nil) (n:(pred n))));
+%test := (\l1. (\l2. ((head l1) + (head l2))));
+
+%listEqual := (\l1. (\l2. (((isnil l1) (isnil l2)) (((head l1) == (head l2)) && ((listEqual (tail l1)) (tail l2))))));
+append := (\l1. (\l2. (((cond (isnil l1)) l2) (((head l1):((append (tail l1)) l2))))));
 
 
+%filter := (\p. (\l. (((cond (isnil l)) nil) (((cond (p (head l))) ((head l):())) ()))));
 
 
 % ---------------COMBINATORS---------------
 Y := (\f. ((\x. (f (x x))) (\x. (f (x x)))));
 
 recur := (\n. (((cond (IsZero n)) base) (recur (pred n))));
+
+fact  := (\n. (((cond (isZero n)) 1) (n * (fact (pred n)))));
+sum   := (\n. (((cond (isZero n)) 0) ((add n) (sum (pred n)))));

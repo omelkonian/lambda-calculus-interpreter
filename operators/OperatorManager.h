@@ -14,6 +14,8 @@
 
 using namespace std;
 
+class AliasManager;
+
 class OperatorManager {
 	AliasManager *aliasManager;
 public:

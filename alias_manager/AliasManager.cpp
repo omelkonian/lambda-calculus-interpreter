@@ -32,6 +32,7 @@ void printString(char *string) {
 
 AliasManager::AliasManager() {
 	this->changesMade = false;
+	this->operatorManager = new OperatorManager(this);
 }
 
 AliasManager::~AliasManager() {
@@ -64,16 +65,19 @@ string AliasManager::deAliasOp(string name) {
 }
 
 string AliasManager::translate(string command) {
-	string ret(command);
-	ret = this->translate1(ret);
+	command = this->translate1(command);
 	while (this->changesMade)
-		ret = this->translate1(ret);
-	return ret;
+		command = this->translate1(command);
+	return command;
 }
 
 string AliasManager::translate1(string command) {
 	vector<replaceTuple> replacements;
 	vector<Variable*> variables = this->getVariables(command.c_str());
+	// TODO Add operators manager
+
+	for (int i = 0; i < (int) variables.size(); i++)
+		variables[i]->print();
 
 	this->changesMade = false;
 	for (int i = 0; i < (int)variables.size(); i++) {
@@ -183,7 +187,7 @@ map<string, string> AliasManager::getOperatorMap() {
 
 void AliasManager::printOperators() {
 	for (map<string, string>::iterator it = this->operatorMap.begin(); it != this->operatorMap.end(); ++it) {
-		cerr << "\33[0;36bm" << it->first << "\33[0m";
+		cerr << "\33[0;36m" << it->first << "\33[0m";
 		cout << " => " << it->second << '\n';
 	}
 }

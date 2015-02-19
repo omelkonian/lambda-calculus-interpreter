@@ -8,17 +8,17 @@
 #ifndef LIST_LISTMANAGER_H_
 #define LIST_LISTMANAGER_H_
 
-#include "../alias_manager/AliasManager.h"
-
+#include <string>
 using namespace std;
 
 class ListManager {
-	AliasManager *aliasManager;
 public:
-	ListManager(AliasManager *aliasManager);
+	ListManager();
 	virtual ~ListManager();
 
 	string translate(string term);
+
+	string deTranslate(string term);
 };
 
 #endif /* LIST_LISTMANAGER_H_ */

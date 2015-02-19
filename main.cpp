@@ -32,23 +32,14 @@ using namespace std;
 
 bool EAGER_EVALUATION;
 bool TRACE;
+bool LIST_RESULT;
 
 int main() {
 	EAGER_EVALUATION = false;
 	TRACE = true;
 
+	//((listEqual (\t. ((t true) true))) ((\y. (\t. ((t true) y))) true))
 
-	// ((\f. ((\x. (f (x x))) (\x. (f (x x))))) (\f. (\n. (((cond (IsZero n)) base) (f (pred n)))))
-	// ((\f. (f (f y))) ((\x. x) (\x. x)))
-	// ((\y. z) ((\x. (x x)) (\x. (x x))))
-	// (\x. ((\z. ((k l) m)) x))
-	// (((\x. ((x x) y)) (\x. ((x x) y))) y)
-	// ((\x. (\y. ((z x) y))) (w y))
-	// ((\x. x) ((\y. (y y)) r))
-	// (\x. ((\y. y) k))
-	// ((\x. (\y. x)) (\z. z))
-	// ((\x. x) (\y. y))
-	// ((\x. x) ((\y. y) (\z. z)))
 	bool runTest = false;
 
 	if (runTest) {
@@ -67,9 +58,14 @@ int main() {
 //		tester->testAliasing();
 //		tester->testEnchurch();
 //		tester->testDechurch();
-		tester->testNumericOperations();
+//		tester->testNumericOperations();
+		tester->testListChecker();
 
 //		tester->globalTest();
+
+
+		cout << "------------ALL TESTS PASSED----------" << endl;
+
 		return 0;
 	}
 
@@ -77,11 +73,13 @@ int main() {
 	aliasManager->consult("files/prelude.alias");
 
 	OperatorManager *operatorManager = new OperatorManager(aliasManager);
-	ListManager *listManager = new ListManager(aliasManager);
+	ListManager *listManager = new ListManager();
 
 	SystemCommandManager *systemCommandManager = new SystemCommandManager(aliasManager);
 
 	while (true) {
+		LIST_RESULT = false;
+
 		char * command = readline("> ");
 		if (!command)
 			break;
@@ -99,14 +97,19 @@ int main() {
 		if (command2[0] == ':')
 			systemCommandManager->execute(command2);
 		else {
+//			cout << "BEF_LIST: " << command2 << endl;
+			command2 = listManager->translate(command2);
+//			cout << "AFT_LIST: " << command2 << endl;
 
-//			command2 = listManager->translate(command2);
-
+			cout << "BEF_OPER: " << command2 << endl;
 			command2 = operatorManager->translate(command2);
+			cout << "AFT_OPER: " << command2 << endl;
 
-//			cout << "BEFORE_TRANSLATE: " << command2 << endl;
+//			cout << "BEF_ALIAS: " << command2 << endl;
 			command2 = aliasManager->translate(command2);
-//			cout << "AFTER_TRANSLATE: " << command2 << endl;
+//			cout << "AFT_ALIAS: " << command2 << endl;
+
+			cerr << "\33[0;4m" << "> " << command2 << "\33[0m";
 
 			char *toExecute = (char*) malloc(strlen(command2.c_str()) + 1);
 			strcpy(toExecute, command2.c_str());
@@ -117,18 +120,7 @@ int main() {
 
 				ChurchNumerator *numerator = new ChurchNumerator(parser->syntaxTree, aliasManager);
 				numerator->enchurch();
-
-//				char *command = parser->syntaxTree->toCommand();
-//				delete parser->syntaxTree;
-//				delete parser;
-//				string commandStr(command);
-//				string newCommandStr = aliasManager->translate(commandStr);
-//				free(command);
-//				char *newCommand = (char*) newCommandStr.c_str();
-//
-//				parser = new Parser(newCommand);
-//				parser->parse();
-//				parser->postProcess();
+				cout << "AFT_ENCH: " << parser->syntaxTree->toCommand() << endl;
 
 				Evaluator *evaluator = new Evaluator(parser->syntaxTree, aliasManager);
 				evaluator->evaluate();
@@ -136,15 +128,25 @@ int main() {
 				numerator->syntaxTree = parser->syntaxTree;
 				numerator->dechurch();
 
-				toExecute = parser->syntaxTree->toCommand();
+				string final;
+				if (LIST_RESULT) {
+					cout << "PRINTING LIST" << endl;
+					char *com = parser->syntaxTree->toCommand();
+					string comStr(com);
+					comStr = aliasManager->deTranslate(comStr);
+					final = listManager->deTranslate(comStr);
+					free(com);
+				}
+				else {
+					char *com = parser->syntaxTree->toCommand();
+					string comStr(com);
+					final = comStr;
+				}
 
+
+				final = aliasManager->deTranslate(final);
 				cerr << "\33[0;31m" << "=>" << "\33[0m";
-				cout << toExecute << endl;
-
-				string finalCommand(toExecute);
-				finalCommand = aliasManager->deTranslate(finalCommand);
-				cerr << "\33[0;31m" << "==>" << "\33[0m";
-				cout << finalCommand << endl;
+				cout << final << endl;
 				free(toExecute);
 			} else
 				cout << "ERROR: Syntax is wrong" << endl;

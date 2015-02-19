@@ -28,7 +28,7 @@
 #include "../utilities/Utilities.h"
 #include "../alias_manager/AliasManager.h"
 #include "../church_numerals/ChurchNumerator.h"
-
+#include "../list/ListManager.h"
 
 using namespace std;
 
@@ -498,4 +498,20 @@ void Tester::globalTest() {
 //	this->testCalculator();
 //	this->testParser();
 	this->testEvaluator();
+}
+
+void Tester::testListChecker() {
+	vector<string> lists;
+	lists.push_back("[1, 2, 3, 4, 5]");
+	lists.push_back("[1]");
+	lists.push_back("[1,2,3,4,5]");
+	lists.push_back("[1,  2,  3,  4,  5]");
+	lists.push_back("[1, 2, 1235,     12,    sdaflgad, 1,1,1,1,1]");
+
+	for (int i = 0; i < (int) lists.size(); i++) {
+		string list = lists[i];
+		ListManager *listM = new ListManager();
+		list = listM->translate(list);
+		assert(Evaluator::isList(list));
+	}
 }
