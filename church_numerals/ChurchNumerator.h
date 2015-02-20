@@ -24,9 +24,9 @@ public:
 
 	void printTree();
 
+	static InternalNode *termToNode(string term);
 private:
 	InternalNode *constructChurchNumeral(int number);
-	InternalNode *termToNode(string term);
 
 };
 

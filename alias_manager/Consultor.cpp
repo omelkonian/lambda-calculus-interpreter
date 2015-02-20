@@ -6,6 +6,7 @@
  */
 
 #include "Consultor.h"
+#include "../error_handler/AutoCorrector.h"
 #include "../defines.h"
 #include "../parser/Parser.h"
 
@@ -61,7 +62,10 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 			string termStr(term);
 			termStr = aliasManager->operatorManager->translate(termStr);
 
-			bool isValidTerm = this->checkTerm((char*) termStr.c_str());
+			string tmp = termStr;
+			tmp = aliasManager->translate(tmp);
+
+			bool isValidTerm = this->checkTerm((char*) tmp.c_str());
 			if (!isValidTerm) {
 				cout << "ERROR: Term of " << alias << " is syntactically wrong. (Line " << lineCount << ")" << endl;
 				free(term);
@@ -98,6 +102,9 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 }
 
 bool Consultor::checkTerm(char* term) {
+	if (!AutoCorrector::parBalanced(string(term)))
+		return false;
+
 	char *surround = (char*) malloc(strlen(term) + 3);
 	int i = 0;
 	surround[i] = '(';

@@ -6,9 +6,11 @@
  */
 
 #include "ListManager.h"
+#include "../error_handler/AutoCorrector.h"
 #include <assert.h>
 #include <stdio.h>
 #include <vector>
+#include <iostream>
 
 ListManager::ListManager() {
 }
@@ -16,8 +18,9 @@ ListManager::ListManager() {
 ListManager::~ListManager() {
 }
 
-string ListManager::translate(string term) {
-	int leftIndex = term.find('[');
+string ListManager::translate(string term) {\
+	int leftIndex = term.find_first_of('[');
+
 	while (leftIndex != (int) term.npos) {
 		int rightIndex = term.find(']');
 		assert(rightIndex != (int) term.npos); // TODO Error Handling
@@ -47,22 +50,18 @@ string ListManager::translate(string term) {
 		string list = "()";
 		int insertionPoint = 1;
 
-		for (int i = 0; i < (int) items.size() - 1; i++) {
+		for (int i = 0; i < (int) items.size(); i++) {
 			string toInsert("(cons ");
 			toInsert += items[i];
-			toInsert += ") ())";
+			if (i != (int) items.size() - 1)
+				toInsert += ") ()";
+			else
+				toInsert += ") nil";
 
 			list.insert(insertionPoint, toInsert);
+
 			insertionPoint += 9 + items[i].size();
 		}
-		string toInsert("(cons ");
-		toInsert += items[items.size() - 1];
-		toInsert += ") ";
-		toInsert += "nil";
-		toInsert += ")";
-
-		list.insert(insertionPoint, toInsert);
-
 		term.replace(leftIndex, rightIndex - leftIndex + 1, list);
 
 		leftIndex = term.find('[');
@@ -97,4 +96,46 @@ string ListManager::deTranslate(string term) {
 	ret += items[items.size() - 1];
 	ret += ']';
 	return ret;
+}
+
+bool ListManager::isList(string term) {
+	int index = term.size() - 1;
+	while (term[index] == ')') index--;
+	if (index < 18) return false;
+	return ((term.substr(index - 18, 19)).compare("(\\t. ((t true) true") == 0);
+}
+
+string ListManager::getPrintForm(string term) {
+	vector<string> items;
+
+	int getPoint = 9;
+	string toCheck(term.substr(getPoint, 4));
+	while (toCheck.compare("true") != 0) {
+		// Get item
+		string item;
+		getPoint += 16;
+		if (term[getPoint] == '(') {
+			int leftIndex = getPoint;
+			int rightIndex = AutoCorrector::getClosingPar(term, getPoint);
+			int itemSize = rightIndex - leftIndex - 1;
+			item = term.substr(leftIndex + 1, itemSize);
+			getPoint += itemSize + 2;
+		}
+		else {
+			while (term[getPoint] != ')')
+				item += term[getPoint++];
+		}
+
+		items.push_back(item);
+		getPoint += 11;
+		toCheck = term.substr(getPoint, 4);
+	}
+
+	string list("[");
+	for (int i = 0; i < (int) items.size(); i++) {
+		list += items[i];
+		list += (i != (int)items.size() - 1) ? ", " : "";
+	}
+	list += ']';
+	return list;
 }

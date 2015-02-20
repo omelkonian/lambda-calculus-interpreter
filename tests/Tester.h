@@ -34,6 +34,8 @@ public:
 	// ERROR-CHECKING
 	void testScannerErrorsRT();
 	void testParserErrors();
+
+	// AUTO-CORRECTING
 	void testAutocorrectorRT();
 
 	// TREE OPERATIONS
@@ -52,8 +54,9 @@ public:
 	void testNumericOperations();
 
 	// LIST
+	void testTermConstruction();
 	void testListChecker();
-
+	void testPrintList();
 
 
 

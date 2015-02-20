@@ -4,81 +4,94 @@
 true  := (\x. (\y. x));
 false := (\x. (\y. y));
 not   := (\z. ((z false) true));
+&!  := not;
 and   := (\p. (\q. ((p q) p)));
+&&& := and;
 or    := (\p. (\q. ((p p) q)));
+&|| := or;
 xor   := (\a. (\b. ((a (not b)) b))); 
 cond  := (\z. (\x. (\y. ((z x) y))));
+
+isZero := (\n. ((n (\x. false)) true));
 
 % ---------------ARITHMETIC OPERATIONS---------------
 succ := (\n. (\f. (\x. (f ((n f) x)))));
 pred := (\n. (\f. (\x. (((n (\g. (\h. (h (g f))))) (\u. x)) (\u. u)))));
+
 add  := (\m. (\n. (\f. (\x. ((m f) ((n f) x))))));
+&+  := add;
 sub  := (\m. (\n. ((n pred) m)));
+&-  := sub;
 mul  := (\m. (\n. (\f. (m (n f)))));
-exp  := (\m. (\n. (n m)));
+&*  := mul;
+exp  := (\m. (\n. (((cond (isZero n)) 1) (m * ((exp m) (n - 1))))));
+&^  := exp;
 
 % ---------------ARITHMETIC PREDICATES---------------
-IsZero := (\n. ((n (\x. false)) true));
-EQ     := (\m. (\n. ((and (IsZero ((sub m) n))) (IsZero ((sub n) m))) ));
-LEQ    := (\m. (\n. (IsZero ((sub m) n))));
+EQ     := (\m. (\n. ((and (isZero ((sub m) n))) (isZero ((sub n) m))) ));
+&== := EQ;
+&!= := (not EQ);
+LEQ    := (\m. (\n. (isZero ((sub m) n))));
+&<= := LEQ;
 LE     := (\m. (\n. ((and (not ((EQ m) n))) ((LEQ m) n))));
+&<  := LE;
 GR	   := (\m. (\n. (not ((LEQ m) n))));
+&>  := GR;
 GEQ   := (\m. (\n. (not ((LE m) n))));
+&>= := GEQ;
 
 % ---------------PAIR---------------
 pair := (\x. (\y. (\t. ((t x) y))));
 fst  := (\z. (z true));
 snd  := (\z. (z false));
 
-
 % ---------------LIST---------------
 nil   := ((pair true) true);
 isnil := fst;
 cons  := (\h. (\t. ((pair false) ((pair h) t))));
+&:  := cons;
 head  := (\z. (fst (snd z)));
 tail  := (\z. (snd (snd z)));
 
-% ---------------OPERATORS---------------
-
-&== := EQ;
-&!= := (not EQ);
-&<  := LE;
-&<= := LEQ;
-&>  := GR;
-&>= := GEQ;
-&&& := and;
-&|| := or;
-&!  := not;
-
-&+  := add;
-&-  := sub;
-&*  := mul;
-&^  := exp;
-
-&,  := pair;
-&:  := cons;
-
 % ---------------LIST OPERATIONS---------------
+listEqual := (\l1. (\l2. (((cond (isnil l1)) (isnil l2)) (((cond (isnil l2)) false) (((head l1) == (head l2)) && ((listEqual (tail l1)) (tail l2)))))));
+&=== := listEqual;
+
 length := (\l. (((cond (isnil l)) 0) (1 + (length (tail l)))));
-index  := (\n. (\l. (((cond (isZero n)) (head l)) ((index (pred n)) (tail l)))));
+
+index  := (\n. (\l. (((cond (n == 0)) (head l)) ((index (pred n)) (tail l)))));
+&~ := index;
+
 member := (\n. (\l. (((cond (isnil l)) false) (((cond (n == (head l))) true) ((member n) (tail l))))));
+&in := member;
 
-test := (\n. (n : nil));
+last := (\l. (((cond ((length l) == 1)) (head l)) ((((length l) == 0) nil) (last (tail l)))));
+removeLast := (\l. (((cond ((length l) == 1)) nil) ((((length l) == 0) false) ((head l) : (removeLast (tail l))))));
 
-%htre   := (\n. (((cond (isZero n)) nil) (n:(pred n))));
-%test := (\l1. (\l2. ((head l1) + (head l2))));
+consSeries := (\n. (\end. (((cond (n > end)) nil) (n : ((consSeries (n + 1)) end)))));
+&.. := consSeries;
 
-%listEqual := (\l1. (\l2. (((isnil l1) (isnil l2)) (((head l1) == (head l2)) && ((listEqual (tail l1)) (tail l2))))));
-append := (\l1. (\l2. (((cond (isnil l1)) l2) (((head l1):((append (tail l1)) l2))))));
+append := (\l1. (\l2. (((cond (isnil l1)) l2) (((head l1) : ((append (tail l1)) l2))))));
+&++ := append;
 
+filter := (\p. (\l. (((cond (isnil l)) nil) (((cond (p (head l))) ((head l) : ((filter p) (tail l)))) ((filter p) (tail l))))));
+&? := filter;
 
-%filter := (\p. (\l. (((cond (isnil l)) nil) (((cond (p (head l))) ((head l):())) ()))));
+map := (\p. (\l. (((cond (isnil l)) nil) ((p (head l)) : ((map p) (tail l))))));
+&-> := map;
 
+all := (\p. (\l. (((cond (isnil l)) true) (((cond (p (head l))) ((all p) (tail l))) false))));
+&?? := all;
+
+take := (\n. (\l. (((cond ((n == 0) || (isnil l)) ) nil) ((head l) : ((take (n - 1)) (tail l))))));
 
 % ---------------COMBINATORS---------------
 Y := (\f. ((\x. (f (x x))) (\x. (f (x x)))));
 
-recur := (\n. (((cond (IsZero n)) base) (recur (pred n))));
+omega := ((\x. (x x)) (\x. (x x)));
+omega2 := ((\x. ((x x) y)) (\x. (x x)));
 
-fact  := (\n. (((cond (isZero n)) 1) (n * (fact (pred n)))));
-sum   := (\n. (((cond (isZero n)) 0) ((add n) (sum (pred n)))));
+
+fact  := (\n. (((cond (n == 0)) 1) (n * (fact (pred n)))));
+sum   := (\n. (((cond (n == 0)) 0) (n + (sum (pred n)))));
+nats := (\n. (n : (nats (n + 1))));

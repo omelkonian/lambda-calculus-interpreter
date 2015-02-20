@@ -112,7 +112,7 @@ InternalNode* ChurchNumerator::termToNode(string term) {
 	strcpy(command, term.c_str());
 
 	Parser *parser = new Parser(command);
-	parser->parse();
+	assert(parser->parse());
 	parser->postProcess();
 	InternalNode *ret = (InternalNode*) parser->syntaxTree->getRoot();
 	parser->syntaxTree->setRoot(NULL);

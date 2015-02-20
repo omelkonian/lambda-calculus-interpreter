@@ -24,6 +24,8 @@ string OperatorManager::translate(string term) {
 		string oper = it->first;
 		int index = term.find(oper);
 		int endOfOper = index + (int) oper.size();
+
+		if (term[index + oper.size()] != 32) index = (int)term.npos; // SPACE AFTERWARDS
 		if (index != (int) term.npos) {
 			bool parenthesisBefore = false;
 			string argument;
@@ -52,25 +54,25 @@ string OperatorManager::translate(string term) {
 					}
 				} else {
 					index--;
-					while (term[index] >= 0 && term[index] != 32 && term[index] != '(')
+					while (index >= 0 && term[index] != 32 && term[index] != '(')
 						argument += term[index--];
 				}
-				if (parenthesisBefore)
-					term.replace(index + 1, oper.size(), it->second);
-				else {
-					string rev(argument);
-					reverse(rev.begin(), rev.end());
-
-					string replacement("(");
-					replacement += it->second;
-					replacement += 32;
-					replacement += rev;
-					replacement += ") ";
-
-					term.replace(index + 1, endOfOper - index - 1, replacement);
-				}
-				it--;
 			}
+			if (parenthesisBefore)
+				term.replace(index + 1, oper.size(), it->second);
+			else {
+				string rev(argument);
+				reverse(rev.begin(), rev.end());
+
+				string replacement("(");
+				replacement += it->second;
+				replacement += 32;
+				replacement += rev;
+				replacement += ") ";
+
+				term.replace(index + 1, endOfOper - index - 1, replacement);
+			}
+			it--;
 		}
 	}
 	return term;

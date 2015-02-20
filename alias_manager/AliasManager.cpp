@@ -74,10 +74,6 @@ string AliasManager::translate(string command) {
 string AliasManager::translate1(string command) {
 	vector<replaceTuple> replacements;
 	vector<Variable*> variables = this->getVariables(command.c_str());
-	// TODO Add operators manager
-
-	for (int i = 0; i < (int) variables.size(); i++)
-		variables[i]->print();
 
 	this->changesMade = false;
 	for (int i = 0; i < (int)variables.size(); i++) {
@@ -139,7 +135,7 @@ vector<Variable*> AliasManager::getVariables(const char *command) {
 				var = (char*) malloc(MAX_COMMAND_LENGTH);
 				var[0] = command[i];
 				var[1] = '\0';
-			} else if (Scanner::isValidVarSymbol(command[i])){
+			} else if (variableFound) {
 				maxRange++;
 				int end = (int) strlen(var);
 				var[end] = command[i];
@@ -176,7 +172,7 @@ vector<Variable*> AliasManager::getVariables(const char *command) {
 
 void AliasManager::printAliases() {
 	for (map<string, string>::iterator it = this->aliasMap.begin(); it != this->aliasMap.end(); ++it) {
-		cerr << "\33[0;36m" << it->first << "\33[0m";
+		cerr << "\33[0;1;36m" << it->first << "\33[0m";
 		cout << " => " << it->second << '\n';
 	}
 }
@@ -187,7 +183,7 @@ map<string, string> AliasManager::getOperatorMap() {
 
 void AliasManager::printOperators() {
 	for (map<string, string>::iterator it = this->operatorMap.begin(); it != this->operatorMap.end(); ++it) {
-		cerr << "\33[0;36m" << it->first << "\33[0m";
+		cerr << "\33[0;1;36m" << it->first << "\33[0m";
 		cout << " => " << it->second << '\n';
 	}
 }

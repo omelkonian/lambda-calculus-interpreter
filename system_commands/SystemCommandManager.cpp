@@ -24,7 +24,7 @@ void SystemCommandManager::execute(string command) {
 	else if (command[1] == '[') {
 		string alias(command.substr(2, command.size() - 3));
 		cout << "alias: " << alias << endl;
-		cerr << "\33[0;36m" << alias << "\33[0m";
+		cerr << "\33[0;1;36m" << alias << "\33[0m";
 		cout << " -> " << this->aliasManager->deAlias(alias) << endl;
 	}
 	else if (command.compare(":revealAliases") == 0) {
@@ -33,16 +33,27 @@ void SystemCommandManager::execute(string command) {
 	else if (command.compare(":revealOperators") == 0) {
 		this->aliasManager->printOperators();
 	}
+	else if (command.compare(":printLimits") == 0) {
+		cerr << "\33[0;1;31m" << "MAX_COMMAND_LENGTH: " << "\33[0m";
+		cout << MAX_COMMAND_LENGTH << endl;
+		cerr << "\33[0;1;31m" << "MAX_VARIABLE_LENGTH: " << "\33[0m";
+		cout << MAX_VARIABLE_LENGTH << endl;
+		cerr << "\33[0;1;31m" << "MAX_NUMBER_DIGITS: " << "\33[0m";
+		cout << MAX_NUMBER_DIGITS << endl;
+	}
 	else if (command.compare(":help") == 0) {
-		cout << ":quit - Terminates the interpreter" << endl;
-		cout << ":[aliasName] - Prints term bound to given alias" << endl;
-		cout << ":revealAliases - Prints all bound variables" << endl;
-		cout << ":revealOperators - Prints all defined operators" << endl;
-		cout << ":trace ON/OFF - If ON, prints every intermediate reduction" << endl;
-		cout << ":eager ON/OFF - ON -> eager evaluation, OFF -> lazy evaluation" << endl;
-		cout << ":consult <filename>  - Adds all aliases specified at <filename>" << endl;
-		cout << ":let <variable> <term> - Binds <term> to <variable>" << endl;
-		cout << ":help - Display all possible commands" << endl;
+		cout << "\33[0;1;33m" << ":quit" << "\33[0m" << " - Terminates the interpreter" << endl;
+		cout << "\33[0;1;33m" << ":[aliasName]" << "\33[0m" << " - Prints term bound to given alias" << endl;
+		cout << "\33[0;1;33m" << ":revealAliases" << "\33[0m" << " - Prints all bound variables" << endl;
+		cout << "\33[0;1;33m" << ":revealOperators" << "\33[0m" << " - Prints all defined operators" << endl;
+		cout << "\33[0;1;33m" << ":printLimits" << "\33[0m" << " - Prints several size limitations" << endl;
+		cout << "\33[0;1;33m" << ":trace ON/OFF" << "\33[0m" << " - Prints intermediate reductions" << endl;
+		cout << "  Trace Commands: step, abort, run" << endl;
+		cout << "\33[0;1;33m" << ":eager ON/OFF" << "\33[0m" << " - ON -> eager evaluation, OFF -> lazy evaluation" << endl;
+		cout << "\33[0;1;33m" << ":consult <filename>" << "\33[0m" << "  - Adds all aliases specified at <filename>" << endl;
+		cout << "\33[0;1;33m" << ":let <variable> <term>" << "\33[0m" << " - Binds <term> to <variable>" << endl;
+		cout << "\33[0;1;33m" << ":debug ON/OFF" << "\33[0m" << " - Prints messages while executing for debugging" << endl;
+		cout << "\33[0;1;33m" << ":help" << "\33[0m" << " - Display all possible commands" << endl;
 	}
 	else if (command.substr(1, 3).compare("let") == 0) {
 		string variable;
@@ -65,6 +76,16 @@ void SystemCommandManager::execute(string command) {
 			TRACE = true;
 		else if (flag.compare("OF") == 0)
 			TRACE = false;
+	}
+	else if (command.substr(1, 5).compare("debug") == 0) {
+		string flag;
+		flag.push_back(command[7]);
+		flag.push_back(command[8]);
+
+		if (flag.compare("ON") == 0)
+			DEBUG = true;
+		else if (flag.compare("OF") == 0)
+			DEBUG = false;
 	}
 	else if (command.substr(1, 5).compare("eager") == 0) {
 		string flag;

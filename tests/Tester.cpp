@@ -264,10 +264,9 @@ void Tester::testAutocorrectorRT() {
 			break;
 		}
 
-		AutoCorrector *ac = new AutoCorrector(command);
-		command = ac->autoCorrect();
+		string commandStr = AutoCorrector::removeUnnecessaryParentheses(string(command));
 		cout << endl;
-		cout << "Final: " << command << endl;
+		cout << "Final: " << commandStr << endl;
 	}
 
 }
@@ -494,24 +493,53 @@ void Tester::testNumericOperations() {
 		cout << "ERROR: Syntax is wrong" << endl;
 }
 
-void Tester::globalTest() {
-//	this->testCalculator();
-//	this->testParser();
-	this->testEvaluator();
+void Tester::testTermConstruction() {
+	vector<string> lists;
+	lists.push_back("[]");
+	lists.push_back("([])");
+	lists.push_back("[1]");
+	lists.push_back("([1])");
+	lists.push_back("[1,  2]");
+
+	for (int i = 0; i < (int) lists.size(); i++) {
+		string list = lists[i];
+		cout << list << " -> ";
+		list = ListManager::translate(list);
+		cout << list << endl;
+	}
 }
 
 void Tester::testListChecker() {
 	vector<string> lists;
-	lists.push_back("[1, 2, 3, 4, 5]");
-	lists.push_back("[1]");
-	lists.push_back("[1,2,3,4,5]");
-	lists.push_back("[1,  2,  3,  4,  5]");
-	lists.push_back("[1, 2, 1235,     12,    sdaflgad, 1,1,1,1,1]");
+	lists.push_back("(\\t. ((t true) true))");
+	lists.push_back("(\\t. ((t false) (\\t. ((t 1) (\\t. ((t true) true))))))");
+	lists.push_back("(\\t. ((t false) (\\t. ((t 1) (\\t. ((t false) (\\t. ((t 2) (\\t. ((t true) true))))))))))");
+	lists.push_back("(\\t. ((t false) (\\t. ((t 2) (\\t. ((t false) (\\t. ((t 4) (\\t. ((t true) true))))))))))");
+	lists.push_back("(\\t. ((t false) (\\t. ((t (\\t. ((t true) true))) (\\t. ((t true) true))))))");
 
 	for (int i = 0; i < (int) lists.size(); i++) {
 		string list = lists[i];
-		ListManager *listM = new ListManager();
-		list = listM->translate(list);
-		assert(Evaluator::isList(list));
+		assert(ListManager::isList(list));
 	}
+}
+
+void Tester::testPrintList() {
+	vector<string> lists;
+	lists.push_back("(\\t. ((t true) true))");
+	lists.push_back("(\\t. ((t false) (\\t. ((t 1) (\\t. ((t true) true))))))");
+	lists.push_back("(\\t. ((t false) (\\t. ((t 1) (\\t. ((t false) (\\t. ((t 2) (\\t. ((t true) true))))))))))");
+	lists.push_back("(\\t. ((t false) (\\t. ((t 2) (\\t. ((t false) (\\t. ((t 4) (\\t. ((t true) true))))))))))");
+
+	for (int i = 0; i < (int) lists.size(); i++) {
+		string list = lists[i];
+		assert(ListManager::isList(list));
+		cout << ListManager::getPrintForm(list) << endl;
+		cout << "================" << endl;
+	}
+}
+
+void Tester::globalTest() {
+//	this->testCalculator();
+//	this->testParser();
+	this->testEvaluator();
 }

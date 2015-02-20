@@ -80,8 +80,6 @@ char* AutoCorrector::autoCorrect() {
 			while (i + 1 < max && Scanner::isValidVarSymbol(command[++i])) {
 			}
 
-
-
 			if (i < max && command[i] == '.') {
 
 				std::vector<indexRange*> ranges;
@@ -94,8 +92,7 @@ char* AutoCorrector::autoCorrect() {
 							cur = NULL;
 						}
 						prev = 32;
-					}
-					else if (Scanner::isValidVarSymbol(command[i])) {
+					} else if (Scanner::isValidVarSymbol(command[i])) {
 						if (prev == 32 || prev == '.') {
 							cur = new indexRange(i, i + 1);
 							ranges.push_back(cur);
@@ -121,7 +118,7 @@ char* AutoCorrector::autoCorrect() {
 }
 
 void AutoCorrector::insertSymbolAt(int position, char symbol) {
-	assert(position < (int) strlen(command));
+	assert(position < (int ) strlen(command));
 	char *newCommand = (char*) malloc(strlen(command) + 2);
 
 	int i = 0;
@@ -178,4 +175,85 @@ int AutoCorrector::getRightParNo() {
 		if (this->command[i] == ')')
 			ret++;
 	return ret;
+}
+
+bool AutoCorrector::parBalanced(string term) {
+	int leftParNo = 0, rightParNo = 0;
+	for (int i = 0; i < (int) term.size(); i++) {
+		leftParNo += (term[i] == '(') ? 1 : 0;
+		rightParNo += (term[i] == ')') ? 1 : 0;
+	}
+	if (leftParNo == 0) return false;
+	return (leftParNo == rightParNo);
+}
+
+string AutoCorrector::removeUnnecessaryParentheses(string term) {
+//	cerr << "Checking ";
+//	cerr << "\33[0;1;31m" << term << "\33[0m" << endl;
+
+	if (!AutoCorrector::parBalanced(term))
+		return term;
+
+	int leftIndex = term.find_first_of('(');
+	int rightIndex = AutoCorrector::getClosingPar(term, leftIndex);
+	assert(rightIndex != -1);
+	if (leftIndex == rightIndex - 1)
+		return term;
+	while (leftIndex != (int) term.npos) {
+		bool leftIn = (term[leftIndex + 1] == '(') ? true : false;
+		bool rightIn = (rightIndex - 1 == AutoCorrector::getClosingPar(term, leftIndex + 1)) ? true : false;
+
+		bool simpleTerm1 = true;
+		for (int i = leftIndex + 1; i < rightIndex; i++) {
+			if (!(Scanner::isValidVarSymbol(term[i]) || Scanner::isValidDigit(term[i]) || term[i] == '[' || term[i] == ']')) {
+				simpleTerm1 = false;
+				break;
+			}
+		}
+
+		bool list = ((term[leftIndex + 1] == '[') && (term[rightIndex - 1] == ']'));
+		if (list) {
+			for (int i = leftIndex + 2; i < rightIndex - 1; i++)
+				if (term[i] == '[' || term[i] == ']') list = false;
+		}
+
+		bool replaced = false;
+		if (leftIn && rightIn) {
+			cout << "#1________________" << term.substr(leftIndex, rightIndex - leftIndex + 1) << endl;
+			term.erase(leftIndex + 1, 1);
+			term.erase(rightIndex - 1, 1);
+			replaced = true;
+		} else if (simpleTerm1 || list) {
+			cout << "#2__________________" << term.substr(leftIndex, rightIndex - leftIndex + 1) << endl;
+			term.erase(leftIndex, 1);
+			term.erase(rightIndex - 1, 1);
+			replaced = true;
+		}
+		if (!replaced) {
+			term[leftIndex] = '$';
+			term[rightIndex] = '#';
+		}
+
+		leftIndex = term.find_first_of('(', leftIndex + 1);
+		if (leftIndex != (int) term.npos)
+			rightIndex = AutoCorrector::getClosingPar(term, leftIndex);
+	}
+
+	for (int i = 0; i < (int) term.size(); i++) {
+		if (term[i] == '$') term[i] = '(';
+		else if (term[i] == '#') term[i] = ')';
+	}
+
+	return term;
+}
+
+int AutoCorrector::getClosingPar(string term, int openingPar) {
+	int parCount = 1;
+	for (int i = openingPar + 1; i < (int) term.size(); i++) {
+		if ((term[i] == ')') && (--parCount == 0))
+			return i;
+		else if (term[i] == '(')
+			parCount++;
+	}
+	return -1;
 }

@@ -16,9 +16,10 @@ public:
 	ListManager();
 	virtual ~ListManager();
 
-	string translate(string term);
-
-	string deTranslate(string term);
+	static string translate(string term);
+	static string deTranslate(string term);
+	static bool isList(string term);
+	static string getPrintForm(string term);
 };
 
 #endif /* LIST_LISTMANAGER_H_ */

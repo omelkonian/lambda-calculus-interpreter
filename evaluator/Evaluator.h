@@ -20,9 +20,6 @@ public:
 	virtual ~Evaluator();
 
 	char* evaluate();
-
-//private:
-	static bool isList(string term);
 };
 
 #endif /* EVALUATOR_EVALUATOR_H_ */
