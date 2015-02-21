@@ -18,7 +18,8 @@ enum TokenType {
 	RIGHT_PAR,
 	VARIABLE,
 	NUMBER,
-	OPERATOR
+	OPERATOR,
+	ERROR
 };
 
 class Token {
@@ -35,7 +36,7 @@ public:
 
 	bool canBeFollowedBy(TokenType type);
 
-	const char* typeToString(TokenType type);
+	static const char* typeToString(TokenType type);
 
 	void print();
 	void print(int indent);

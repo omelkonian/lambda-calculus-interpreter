@@ -37,7 +37,6 @@ string ListManager::translate(string term) {\
 		int i = 0;
 		string item;
 		while (interior[i] != ',' && i < (int) interior.size()) {
-			if (interior[i] == 32) i++;
 			item += interior[i++];
 			if (interior[i] == ',' || i == (int) interior.size()) {
 				items.push_back(item);

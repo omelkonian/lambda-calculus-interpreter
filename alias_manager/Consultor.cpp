@@ -28,6 +28,7 @@ Consultor::~Consultor() {
 }
 
 void Consultor::getStatements(AliasManager *aliasManager) {
+	if (DEBUG) cout << "Consulting " << this->filename << endl;
 	ifstream file(this->filename);
 
 	if (file.is_open()) {
@@ -36,6 +37,7 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 		string line;
 		int lineCount = 0;
 		while (getline(file, line)) {
+			if (DEBUG) cout << "Line: " << line << endl;
 			lineCount++;
 			stringstream lineStream(line);
 
@@ -67,7 +69,7 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 
 			bool isValidTerm = this->checkTerm((char*) tmp.c_str());
 			if (!isValidTerm) {
-				cout << "ERROR: Term of " << alias << " is syntactically wrong. (Line " << lineCount << ")" << endl;
+				cout << "ERROR: Term of " << alias << " is syntactically wrong. (Line " << lineCount << ")" << endl; // TODO coloring
 				free(term);
 				free(alias);
 				break;
@@ -75,6 +77,7 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 
 			// If recursion occurs, edit the command using the Y-combinator.
 			string variable(alias);
+			if (DEBUG) cout << "Recursion check: " << variable << " := " << termStr << endl;
 			if (this->hasRecursion(variable, termStr)) {
 				string finalTerm("(");
 				string Y_combinator("(\\f. ((\\x. (f (x x))) (\\x. (f (x x)))))");
@@ -98,11 +101,12 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 			free(alias);
 		}
 	} else
-		cout << "ERROR: Unable to open " << file << endl;
+		cout << "ERROR: Unable to open " << file << endl; // TODO coloring
 }
 
 bool Consultor::checkTerm(char* term) {
-	if (!AutoCorrector::parBalanced(string(term)))
+	if (DEBUG) cout << "Checking " << term << endl;
+	if (AutoCorrector::getLeftParNo(string(term)) != AutoCorrector::getRightParNo(string(term)))
 		return false;
 
 	char *surround = (char*) malloc(strlen(term) + 3);
@@ -116,6 +120,7 @@ bool Consultor::checkTerm(char* term) {
 	bool ret = parser->parse();
 	delete parser;
 	free(surround);
+	if (DEBUG) cout << "Checked " << term << endl;
 	return ret;
 }
 

@@ -6,6 +6,7 @@
  */
 
 #include "error_handling.h"
+#include "../defines.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,7 +20,7 @@ void print_error(const char *errorMessage, int position) {
 	cout << "^" << endl;
 	for (int i = 0; i < position; i++)
 		cout << " ";
+	cerr << "\33[0;1;31m" << "ERROR " << "\33[0m";
 	cout << errorMessage << endl;
-
-	exit(-1);
+	ERROR_FOUND = true;
 }

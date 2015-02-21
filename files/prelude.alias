@@ -30,7 +30,6 @@ exp  := (\m. (\n. (((cond (isZero n)) 1) (m * ((exp m) (n - 1))))));
 % ---------------ARITHMETIC PREDICATES---------------
 EQ     := (\m. (\n. ((and (isZero ((sub m) n))) (isZero ((sub n) m))) ));
 &== := EQ;
-&!= := (not EQ);
 LEQ    := (\m. (\n. (isZero ((sub m) n))));
 &<= := LEQ;
 LE     := (\m. (\n. ((and (not ((EQ m) n))) ((LEQ m) n))));
@@ -91,7 +90,6 @@ Y := (\f. ((\x. (f (x x))) (\x. (f (x x)))));
 omega := ((\x. (x x)) (\x. (x x)));
 omega2 := ((\x. ((x x) y)) (\x. (x x)));
 
-
-fact  := (\n. (((cond (n == 0)) 1) (n * (fact (pred n)))));
-sum   := (\n. (((cond (n == 0)) 0) (n + (sum (pred n)))));
+fact  := (\n. (((cond (isZero n)) 1) (n * (fact (pred n)))));
+sum   := (\n. (((cond (isZero n)) 0) (n + (sum (pred n)))));
 nats := (\n. (n : (nats (n + 1))));

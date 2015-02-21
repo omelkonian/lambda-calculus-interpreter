@@ -40,6 +40,8 @@ void SystemCommandManager::execute(string command) {
 		cout << MAX_VARIABLE_LENGTH << endl;
 		cerr << "\33[0;1;31m" << "MAX_NUMBER_DIGITS: " << "\33[0m";
 		cout << MAX_NUMBER_DIGITS << endl;
+		cerr << "\33[0;1;31m" << "MAX_NUMBER: " << "\33[0m";
+		cout << MAX_NUMBER << endl;
 	}
 	else if (command.compare(":help") == 0) {
 		cout << "\33[0;1;33m" << ":quit" << "\33[0m" << " - Terminates the interpreter" << endl;
@@ -53,6 +55,7 @@ void SystemCommandManager::execute(string command) {
 		cout << "\33[0;1;33m" << ":consult <filename>" << "\33[0m" << "  - Adds all aliases specified at <filename>" << endl;
 		cout << "\33[0;1;33m" << ":let <variable> <term>" << "\33[0m" << " - Binds <term> to <variable>" << endl;
 		cout << "\33[0;1;33m" << ":debug ON/OFF" << "\33[0m" << " - Prints messages while executing for debugging" << endl;
+		cout << "\33[0;1;33m" << ":time ON/OFF" << "\33[0m" << " - Prints the execution time of each command" << endl;
 		cout << "\33[0;1;33m" << ":help" << "\33[0m" << " - Display all possible commands" << endl;
 	}
 	else if (command.substr(1, 3).compare("let") == 0) {
@@ -73,29 +76,41 @@ void SystemCommandManager::execute(string command) {
 		flag.push_back(command[8]);
 
 		if (flag.compare("ON") == 0)
-			TRACE = true;
+			TRACE = (!EAGER_EVALUATION) ? true:false;
 		else if (flag.compare("OF") == 0)
 			TRACE = false;
 	}
 	else if (command.substr(1, 5).compare("debug") == 0) {
-		string flag;
-		flag.push_back(command[7]);
-		flag.push_back(command[8]);
+			string flag;
+			flag.push_back(command[7]);
+			flag.push_back(command[8]);
 
-		if (flag.compare("ON") == 0)
-			DEBUG = true;
-		else if (flag.compare("OF") == 0)
-			DEBUG = false;
+			if (flag.compare("ON") == 0)
+				DEBUG = true;
+			else if (flag.compare("OF") == 0)
+				DEBUG = false;
 	}
 	else if (command.substr(1, 5).compare("eager") == 0) {
 		string flag;
 		flag.push_back(command[7]);
 		flag.push_back(command[8]);
 
-		if (flag.compare("ON") == 0)
+		if (flag.compare("ON") == 0) {
 			EAGER_EVALUATION = true;
+			TRACE = false;
+		}
 		else if (flag.compare("OF") == 0)
 			EAGER_EVALUATION = false;
+	}
+	else if (command.substr(1, 4).compare("time") == 0) {
+			string flag;
+			flag.push_back(command[6]);
+			flag.push_back(command[7]);
+
+			if (flag.compare("ON") == 0)
+				TIME = true;
+			else if (flag.compare("OF") == 0)
+				TIME = false;
 	}
 	else if (command.substr(1, 7).compare("consult") == 0) {
 		string filename;

@@ -264,11 +264,7 @@ InternalNode* AST::substitute(InternalNode *node) {
 
 	if (EAGER_EVALUATION) {
 		// Bring argument to canonical form.
-		bool changed = false;
-		if (TRACE) {
-			TRACE = false;
-			changed = true;
-		}
+		TRACE = false;
 
 		InternalNode *newSubtree = toInsert->getNewByCopy();
 		AST *subtree = new AST(newSubtree);
@@ -279,13 +275,6 @@ InternalNode* AST::substitute(InternalNode *node) {
 		delete eval;
 		this->replace(toInsert, newSubtree);
 		toInsert = newSubtree;
-
-		if (changed) {
-			char *newCommand = this->toCommand();
-			cout << "-> " << newCommand << endl;
-			free(newCommand);
-			TRACE = true;
-		}
 	}
 
 	this->substitute1((InternalNode*) insertTo->children[2], toInsert, ((Leaf*) insertTo->children[1])->token->value->value.string);
@@ -479,7 +468,6 @@ void AST::alpha_convert1(Node* node, char* varName, char* replacement) {
 			}
 		} else if (cur->type == ABSTRACTION) {
 			char *bindedVar = ((Leaf*) cur->children[1])->token->value->value.string;
-			assert(strcmp(bindedVar, varName));
 			this->alpha_convert1(cur->children[2], varName, replacement);
 		} else if (cur->type == APPLICATION) {
 			this->alpha_convert1(cur->children[1], varName, replacement);

@@ -41,6 +41,7 @@ class Parser {
 	int savedTokens;
 	int curIndex;
 
+	bool scannerError;
 public:
 	AST *syntaxTree;
 

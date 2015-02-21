@@ -40,7 +40,6 @@ Scanner::Scanner(char *command) {
 }
 
 Scanner::~Scanner() {
-//	free(this->command); // is freed by caller
 }
 
 Token* Scanner::nextToken() {
@@ -58,8 +57,10 @@ Token* Scanner::nextToken() {
 
 		if ((!firstSymbolRead) && (cur != 32)) {
 			firstSymbolRead = true;
-			if (cur != '(')
-				print_error("ERROR: Left parenthesis missing", this->readPosition - 1);
+			if (cur != '(') {
+				print_error("Left parenthesis missing", this->readPosition - 1);
+				return new Token(ERROR, 0, NULL);
+			}
 		}
 
 		switch (cur) {
@@ -90,8 +91,10 @@ Token* Scanner::nextToken() {
 				return new Token(OPERATOR, this->readPosition - 1, new TokenValue(CHAR, &cur));
 			}
 			// Non-spaced operation
-			else if ((isValidOperator(cur) && (cur != '-') && (this->readPosition + 1 < maxReadPos) && isValidDigit(this->command[this->readPosition + 1])))
-				print_error("ERROR: Space required between arithmetic operations", this->readPosition);
+			else if ((isValidOperator(cur) && (cur != '-') && (this->readPosition + 1 < maxReadPos) && isValidDigit(this->command[this->readPosition + 1]))) {
+				print_error("Space required between arithmetic operations", this->readPosition);
+				return new Token(ERROR, 0, NULL);
+			}
 			// Digit
 			else if (isValidDigit(cur) || ((cur == '-') && (this->readPosition + 1 < maxReadPos) && isValidDigit(this->command[this->readPosition + 1]))) {
 				number[numberLen++] = cur;
@@ -112,12 +115,17 @@ Token* Scanner::nextToken() {
 							ret = atoi(number);
 						return new Token(NUMBER, this->readPosition - 1, new TokenValue(INTEGER, &ret));
 					}
-					else if (isValidVarSymbol(cur))
-						print_error("ERROR: Invalid variable identifier - cannot start with a number", this->readPosition - numberLen);
-					else
-						print_error("ERROR: Invalid number [0-9]", this->readPosition);
+					else if (isValidVarSymbol(cur)) {
+						print_error("Invalid variable identifier - cannot start with a number", this->readPosition - numberLen);
+						return new Token(ERROR, 0, NULL);
+					}
+					else {
+						print_error("Invalid number [0-9]", this->readPosition);
+						return new Token(ERROR, 0, NULL);
+					}
 				}
-				print_error("ERROR: Right parenthesis missing", this->readPosition);
+				print_error("Right parenthesis missing", this->readPosition);
+				return new Token(ERROR, 0, NULL);
 			}
 			// Variable
 			else if (isValidVarSymbol(cur)) {
@@ -134,14 +142,19 @@ Token* Scanner::nextToken() {
 						char *variableRet = (char*) malloc(strlen((const char*) variableName));
 						strcpy(variableRet, (const char*) variableName);
 						return new Token(VARIABLE, this->readPosition - 1, new TokenValue(STRING, variableRet));
-					} else
-						print_error("ERROR: Invalid variable identifier", this->readPosition);
+					} else {
+						print_error("Invalid variable identifier", this->readPosition);
+						return new Token(ERROR, 0, NULL);
+					}
 				}
-				print_error("ERROR: Right parenthesis missing", this->readPosition);
+				print_error("Right parenthesis missing", this->readPosition);
+				return new Token(ERROR, 0, NULL);
 			}
 			// Invalid Symbol
-			else
-				print_error("ERROR: Unknown symbol", this->readPosition);
+			else {
+				print_error("Unknown symbol", this->readPosition);
+				return new Token(ERROR, 0, NULL);
+			}
 		}
 	}
 	return NULL;

@@ -8,6 +8,7 @@
 #include "ChurchNumerator.h"
 #include "../parser/Parser.h"
 #include "../abstract_syntax_tree/InternalNode.h"
+#include "../defines.h"
 #include <string>
 #include <stdlib.h>
 #include <string.h>
@@ -40,6 +41,8 @@ void ChurchNumerator::enchurch() {
 		if (cur->children.size() == 1) {
 			// Get number
 			int number = ((Leaf*) cur->children[0])->token->value->value.number;
+			if (number > MAX_NUMBER)
+				number = MAX_NUMBER;
 			// Construct numeral
 			InternalNode *numeral = this->constructChurchNumeral(number);
 			// Replace in syntaxTree

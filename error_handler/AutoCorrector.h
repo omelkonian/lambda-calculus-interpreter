@@ -12,24 +12,14 @@
 using namespace std;
 
 class AutoCorrector {
-	char *command;
 public:
-	AutoCorrector(char *command);
+	AutoCorrector();
 	virtual ~AutoCorrector();
 
-	char* autoCorrect();
-
-	static bool parBalanced(string term);
 	static string removeUnnecessaryParentheses(string term);
 	static int getClosingPar(string term, int openingPar);
-private:
-	void insertSymbolAt(int position, char symbol);
-	char getFirstChar();
-	int getFirstCharPos();
-	char getLastChar();
-	int getLastCharPos();
-	int getLeftParNo();
-	int getRightParNo();
+	static int getLeftParNo(string term);
+	static int getRightParNo(string term);
 };
 
 #endif /* ERROR_HANDLER_AUTOCORRECTOR_H_ */

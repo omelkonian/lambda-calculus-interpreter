@@ -10,8 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-//#include <curses.h>
-//#include <term.h>
+#include <time.h>
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -27,18 +26,20 @@
 #include "system_commands/SystemCommandManager.h"
 #include "operators/OperatorManager.h"
 #include "list/ListManager.h"
+#include "translator/Translator.h"
 
 using namespace std;
 
-bool EAGER_EVALUATION;
-bool TRACE;
-bool LIST_RESULT;
+bool EAGER_EVALUATION, TRACE, NON_STOP, DEBUG, ERROR_FOUND, TIME;
 
 int main() {
 	EAGER_EVALUATION = false;
-	TRACE = true;
+	TRACE = false;
+	NON_STOP = false;
+	DEBUG = false;
+	TIME = true;
 
-	//((listEqual (\t. ((t true) true))) ((\y. (\t. ((t true) y))) true))
+	clock_t begin_time;
 
 	bool runTest = false;
 
@@ -60,9 +61,10 @@ int main() {
 //		tester->testDechurch();
 //		tester->testNumericOperations();
 		tester->testListChecker();
+//		tester->testTermConstruction();
+//		tester->testPrintList();
 
 //		tester->globalTest();
-
 
 		cout << "------------ALL TESTS PASSED----------" << endl;
 
@@ -70,16 +72,13 @@ int main() {
 	}
 
 	AliasManager *aliasManager = new AliasManager();
-	aliasManager->consult("files/prelude.alias");
+	aliasManager->consult("../files/prelude.alias");
 
-	OperatorManager *operatorManager = new OperatorManager(aliasManager);
-	ListManager *listManager = new ListManager();
+	Translator *translator = new Translator(aliasManager);
 
 	SystemCommandManager *systemCommandManager = new SystemCommandManager(aliasManager);
 
 	while (true) {
-		LIST_RESULT = false;
-
 		char * command = readline("> ");
 		if (!command)
 			break;
@@ -92,64 +91,104 @@ int main() {
 			break;
 		}
 
-		string command2(command);
+		string comStr(command);
 
-		if (command2[0] == ':')
-			systemCommandManager->execute(command2);
+		if (comStr[0] == ':')
+			systemCommandManager->execute(comStr);
 		else {
-//			cout << "BEF_LIST: " << command2 << endl;
-			command2 = listManager->translate(command2);
-//			cout << "AFT_LIST: " << command2 << endl;
+			begin_time = clock();
 
-			cout << "BEF_OPER: " << command2 << endl;
-			command2 = operatorManager->translate(command2);
-			cout << "AFT_OPER: " << command2 << endl;
 
-//			cout << "BEF_ALIAS: " << command2 << endl;
-			command2 = aliasManager->translate(command2);
-//			cout << "AFT_ALIAS: " << command2 << endl;
+			string copy = comStr;
 
-			cerr << "\33[0;4m" << "> " << command2 << "\33[0m";
+			comStr = translator->translate(comStr);
 
-			char *toExecute = (char*) malloc(strlen(command2.c_str()) + 1);
-			strcpy(toExecute, command2.c_str());
+			if (comStr.compare(copy) != 0)
+				cerr << "\33[0;1;31m" << "> " << comStr << "\33[0m" << endl;
 
+			char *toExecute = (char*) malloc(strlen(comStr.c_str()) + 1);
+			strcpy(toExecute, comStr.c_str());
+
+			ERROR_FOUND = false;
+
+			if (DEBUG) {
+				cout << "=======================================================" << endl;
+				cout << "PARSING ->" << toExecute << endl;
+			}
 			Parser *parser = new Parser(toExecute);
+			if (DEBUG) cout << "Parser initialized" << endl;
 			if (parser->parse()) {
+				if (DEBUG) cout << "Parsed" << endl;
 				parser->postProcess();
+				if (DEBUG) cout << "Post-processed" << endl;
+				free(toExecute);
 
+				char *copy, *enchurched;
+				if (DEBUG) {
+					cout << "--------------ENCHURCH------------" << endl;
+					copy = parser->syntaxTree->toCommand();
+				}
 				ChurchNumerator *numerator = new ChurchNumerator(parser->syntaxTree, aliasManager);
 				numerator->enchurch();
-				cout << "AFT_ENCH: " << parser->syntaxTree->toCommand() << endl;
+				if (DEBUG) {
+					enchurched = parser->syntaxTree->toCommand();
+					if (strcmp(copy, enchurched) != 0) {
+						cerr << "\33[0;1;32m" << copy << "\33[0m" << endl;
+						cerr << "\33[0;1;33m" << enchurched << "\33[0m" << endl;
+					}
+					free(copy);
+					free(enchurched);
+				}
 
 				Evaluator *evaluator = new Evaluator(parser->syntaxTree, aliasManager);
 				evaluator->evaluate();
 
+				if (DEBUG) {
+					cout << "--------------DECHURCH------------" << endl;
+					copy = parser->syntaxTree->toCommand();
+				}
 				numerator->syntaxTree = parser->syntaxTree;
 				numerator->dechurch();
-
-				string final;
-				if (LIST_RESULT) {
-					cout << "PRINTING LIST" << endl;
-					char *com = parser->syntaxTree->toCommand();
-					string comStr(com);
-					comStr = aliasManager->deTranslate(comStr);
-					final = listManager->deTranslate(comStr);
-					free(com);
-				}
-				else {
-					char *com = parser->syntaxTree->toCommand();
-					string comStr(com);
-					final = comStr;
+				if (DEBUG) {
+					enchurched = parser->syntaxTree->toCommand();
+					if (strcmp(copy, enchurched) != 0) {
+						cerr << "\33[0;1;32m" << copy << "\33[0m" << endl;
+						cerr << "\33[0;1;33m" << enchurched << "\33[0m" << endl;
+					}
+					free(copy);
+					free(enchurched);
 				}
 
+				char *com = parser->syntaxTree->toCommand();
+				string final(com);
+				free(com);
 
+				string copy1;
+				if (DEBUG) {
+					cout << "--------------DeTranslate------------" << endl;
+					copy1 = final;
+				}
 				final = aliasManager->deTranslate(final);
-				cerr << "\33[0;31m" << "=>" << "\33[0m";
-				cout << final << endl;
-				free(toExecute);
+				if (DEBUG) {
+					if (final.compare(copy1) != 0) {
+						cerr << "\33[0;1;32m" << copy1 << "\33[0m" << endl;
+						cerr << "\33[0;1;33m" << final << "\33[0m" << endl;
+					}
+				}
+
+				// Check if result is a list.
+				if (ListManager::isList(final))
+					final = ListManager::getPrintForm(final);
+
+				if (!ERROR_FOUND) {
+					cerr << "\33[0;1;31m" << "=>" << "\33[0m";
+					cout << final;
+					if (TIME)
+						cerr << "\33[0;1;34m" << " (" << float(clock() - begin_time) / CLOCKS_PER_SEC << " seconds)" << "\33[0m";
+					cout << endl;
+				}
 			} else
-				cout << "ERROR: Syntax is wrong" << endl;
+				cout << "\33[0;1;31m" << "ERROR" << "\33[0m" << " Syntax is wrong" << endl;
 		}
 		free(command);
 	}
