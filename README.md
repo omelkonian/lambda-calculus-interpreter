@@ -6,4 +6,4 @@ Setup
 
 2. make all
 
-3. execute .exe file
+3. run executable
