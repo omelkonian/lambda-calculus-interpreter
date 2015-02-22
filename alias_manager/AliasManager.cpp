@@ -36,12 +36,15 @@ AliasManager::AliasManager() {
 }
 
 AliasManager::~AliasManager() {
-	// TODO free memory
+//	delete this->operatorManager;
+//	this->aliasMap.clear();
+//	this->operatorMap.clear();
 }
 
 void AliasManager::consult(const char *file) {
 	Consultor *consultor = new Consultor(file);
 	consultor->getStatements(this);
+//	delete consultor;
 }
 
 string AliasManager::deAlias(string name) {
@@ -86,7 +89,12 @@ string AliasManager::translate1(string command) {
 		}
 	}
 
-	return this->replace(command, replacements);
+	string ret = this->replace(command, replacements);
+//
+//	for (int i = 0; i < (int) variables.size(); i++)
+//		delete variables[i];
+
+	return ret;
 }
 
 string AliasManager::deTranslate(string command) {

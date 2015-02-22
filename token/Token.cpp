@@ -38,6 +38,8 @@ const char* Token::typeToString(TokenType type) {
 		return "number";
 	case 6:
 		return "operator";
+	case 7:
+		return "error";
 	default:
 		return "UNKNOWN";
 	}
@@ -56,7 +58,8 @@ Token::Token(TokenType type, int position, TokenValue *value) {
 }
 
 Token::~Token() {
-	delete this->value;
+	if (this->value)
+		delete this->value;
 }
 
 void Token::print() {
@@ -74,22 +77,42 @@ bool Token::canBeFollowedBy(TokenType type) {
 			validTypes += VARIABLE;
 			break;
 		case LAMBDA_DOT:
-			validTypes += VARIABLE, NUMBER, LEFT_PAR;
+			validTypes += VARIABLE;
+			validTypes += NUMBER;
+			validTypes += LEFT_PAR;
 			break;
 		case LEFT_PAR:
-			validTypes += LEFT_PAR, NUMBER, LAMBDA, VARIABLE;
+			validTypes += LEFT_PAR;
+			validTypes += NUMBER;
+			validTypes += LAMBDA;
+			validTypes += VARIABLE;
 			break;
 		case RIGHT_PAR:
-			validTypes += OPERATOR, RIGHT_PAR, VARIABLE, LEFT_PAR, NUMBER;
+			validTypes += OPERATOR;
+			validTypes += RIGHT_PAR;
+			validTypes += VARIABLE;
+			validTypes += LEFT_PAR;
+			validTypes += NUMBER;
 			break;
 		case VARIABLE:
-			validTypes += VARIABLE, LEFT_PAR, RIGHT_PAR, NUMBER, LAMBDA_DOT;
+			validTypes += VARIABLE;
+			validTypes += LEFT_PAR;
+			validTypes += RIGHT_PAR;
+			validTypes += NUMBER;
+			validTypes += LAMBDA_DOT;
 			break;
 		case NUMBER:
-			validTypes += VARIABLE, OPERATOR, LEFT_PAR, RIGHT_PAR, NUMBER;
+			validTypes += VARIABLE;
+			validTypes += OPERATOR;
+			validTypes += LEFT_PAR;
+			validTypes += RIGHT_PAR;
+			validTypes += NUMBER;
 			break;
 		case OPERATOR:
-			validTypes += NUMBER, LEFT_PAR;
+			validTypes += NUMBER;
+			validTypes += LEFT_PAR;
+			break;
+		case ERROR:
 			break;
 	}
 	bool found = false;

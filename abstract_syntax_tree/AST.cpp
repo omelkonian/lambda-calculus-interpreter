@@ -29,6 +29,7 @@ AST::AST(Node *root) {
 
 AST::~AST() {
 	delete this->root;
+	delete this->varPool;
 }
 
 Node* AST::getRoot() {
@@ -289,6 +290,7 @@ InternalNode* AST::substitute(InternalNode *node) {
 	delete ((InternalNode*) node->children[1])->children[3];
 
 	node->children.erase(node->children.begin() + 2);
+//	delete node->children[1];
 	node->children.erase(node->children.begin() + 1);
 
 	return newNode;
@@ -542,6 +544,8 @@ void AST::getAllChurchNumerals1(Node* node, vector<pair<InternalNode*, int> > *v
 int AST::isChurchNumeral(InternalNode* node) {
 	AST *tree = new AST(node);
 	char *command = tree->toCommand();
+	tree->setRoot(NULL);
+	delete tree;
 	string string(command);
 	free(command);
 

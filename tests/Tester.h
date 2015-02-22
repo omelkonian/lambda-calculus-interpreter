@@ -59,9 +59,6 @@ public:
 	void testPrintList();
 
 
-
-
-
 	void globalTest();
 };
 

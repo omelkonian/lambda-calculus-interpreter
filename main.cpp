@@ -12,8 +12,7 @@
 
 #include <time.h>
 
-#include <readline/readline.h>
-#include <readline/history.h>
+#include "linenoise/linenoise.h"
 
 #include "error_handler/error_handling.h"
 #include "defines.h"
@@ -36,7 +35,7 @@ int main() {
 	EAGER_EVALUATION = false;
 	TRACE = false;
 	NON_STOP = false;
-	DEBUG = false;
+	DEBUG = true;
 	TIME = true;
 
 	clock_t begin_time;
@@ -60,15 +59,17 @@ int main() {
 //		tester->testEnchurch();
 //		tester->testDechurch();
 //		tester->testNumericOperations();
-		tester->testListChecker();
+//		tester->testListChecker();
 //		tester->testTermConstruction();
 //		tester->testPrintList();
 
 //		tester->globalTest();
 
+		delete tester;
 		cout << "------------ALL TESTS PASSED----------" << endl;
 
 		return 0;
+		exit(0);
 	}
 
 	AliasManager *aliasManager = new AliasManager();
@@ -78,20 +79,22 @@ int main() {
 
 	SystemCommandManager *systemCommandManager = new SystemCommandManager(aliasManager);
 
-	while (true) {
-		char * command = readline("> ");
+	char *command;
+	while((command = linenoise("> ")) != NULL) {
 		if (!command)
 			break;
 		if (strlen(command) == 0)
 			continue;
-		if (*command)
-			add_history(command);
+		if (*command) {
+			linenoiseHistoryAdd(command); /* Add to the history. */
+			linenoiseHistorySave("history.txt"); /* Save the history on disk. */
+		}
 		if (strcmp(command, "quit") == 0) {
 			free(command);
 			break;
 		}
 
-		string comStr(command);
+		string comStr = command;
 
 		if (comStr[0] == ':')
 			systemCommandManager->execute(comStr);
@@ -141,16 +144,16 @@ int main() {
 				}
 
 				Evaluator *evaluator = new Evaluator(parser->syntaxTree, aliasManager);
-				evaluator->evaluate();
+				free(evaluator->evaluate());
 
 				if (DEBUG) {
 					cout << "--------------DECHURCH------------" << endl;
-					copy = parser->syntaxTree->toCommand();
+					copy = evaluator->syntaxTree->toCommand();
 				}
 				numerator->syntaxTree = parser->syntaxTree;
 				numerator->dechurch();
 				if (DEBUG) {
-					enchurched = parser->syntaxTree->toCommand();
+					enchurched = evaluator->syntaxTree->toCommand();
 					if (strcmp(copy, enchurched) != 0) {
 						cerr << "\33[0;1;32m" << copy << "\33[0m" << endl;
 						cerr << "\33[0;1;33m" << enchurched << "\33[0m" << endl;
@@ -187,6 +190,8 @@ int main() {
 						cerr << "\33[0;1;34m" << " (" << float(clock() - begin_time) / CLOCKS_PER_SEC << " seconds)" << "\33[0m";
 					cout << endl;
 				}
+				delete parser;
+				delete evaluator;
 			} else
 				cout << "\33[0;1;31m" << "ERROR" << "\33[0m" << " Syntax is wrong" << endl;
 		}

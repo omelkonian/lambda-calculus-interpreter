@@ -13,9 +13,10 @@
 #include <string>
 
 class Evaluator {
-	AST *syntaxTree;
 	AliasManager *aliasManager;
 public:
+	AST *syntaxTree;
+
 	Evaluator(AST *syntaxTree, AliasManager *aliasManager);
 	virtual ~Evaluator();
 

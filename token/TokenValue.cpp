@@ -40,8 +40,9 @@ default:
 }
 
 TokenValue::~TokenValue() {
-if (this->type == STRING)
-	free(this->value.string);
+	if (this->type == STRING) {
+		free(this->value.string);
+	}
 }
 
 void TokenValue::print() {
