@@ -12,9 +12,6 @@
 #include <string.h>
 #include <malloc.h>
 
-#include <readline/readline.h>
-#include <readline/history.h>
-
 #include "../parser/Parser.h"
 #include "../scanner/Scanner.h"
 #include "../abstract_syntax_tree/AST.h"
