@@ -29,14 +29,15 @@
 
 using namespace std;
 
-bool EAGER_EVALUATION, TRACE, NON_STOP, DEBUG, ERROR_FOUND, TIME;
+bool EAGER_EVALUATION, TRACE, NON_STOP, DEBUG, ERROR_FOUND, TIME, PURE_TERM;
 
 int main() {
 	EAGER_EVALUATION = false;
 	TRACE = false;
 	NON_STOP = false;
-	DEBUG = true;
+	DEBUG = false;
 	TIME = true;
+	PURE_TERM = false;
 
 	clock_t begin_time;
 
@@ -106,7 +107,7 @@ int main() {
 
 			comStr = translator->translate(comStr);
 
-			if (comStr.compare(copy) != 0)
+			if (PURE_TERM && comStr.compare(copy) != 0)
 				cerr << "\33[0;1;31m" << "> " << comStr << "\33[0m" << endl;
 
 			char *toExecute = (char*) malloc(strlen(comStr.c_str()) + 1);

@@ -21,6 +21,8 @@ extern bool TRACE;
 extern bool NON_STOP;
 extern bool TIME;
 
+extern bool PURE_TERM;
+
 // DEBUGGING
 extern bool DEBUG;
 

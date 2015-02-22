@@ -69,7 +69,8 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 
 			bool isValidTerm = this->checkTerm((char*) tmp.c_str());
 			if (!isValidTerm) {
-				cout << "ERROR: Term of " << alias << " is syntactically wrong. (Line " << lineCount << ")" << endl; // TODO coloring
+				cerr << "\33[0;1;31m" << "ERROR "<< "\33[0m";
+				cerr << "Term of " << alias << " is syntactically wrong. (Line " << lineCount << ")" << endl;
 				free(term);
 				free(alias);
 				break;
@@ -100,8 +101,10 @@ void Consultor::getStatements(AliasManager *aliasManager) {
 			free(term);
 			free(alias);
 		}
-	} else
-		cout << "ERROR: Unable to open " << file << endl; // TODO coloring
+	} else {
+		cerr << "\33[0;1;31m" << "ERROR "<< "\33[0m";
+		cerr << "Unable to open " << filename << endl;
+	}
 }
 
 bool Consultor::checkTerm(char* term) {

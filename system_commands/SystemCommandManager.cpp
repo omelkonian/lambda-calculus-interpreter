@@ -23,9 +23,13 @@ void SystemCommandManager::execute(string command) {
 	}
 	else if (command[1] == '[') {
 		string alias(command.substr(2, command.size() - 3));
-		cout << "alias: " << alias << endl;
 		cerr << "\33[0;1;36m" << alias << "\33[0m";
-		cout << " -> " << this->aliasManager->deAlias(alias) << endl;
+		string term = this->aliasManager->deAlias(alias);
+		if (term.empty())
+			term = this->aliasManager->deAliasOp(alias);
+		cout << " -> ";
+		if (term.empty()) cout << "None" << endl;
+		else cout << term << endl;
 	}
 	else if (command.compare(":revealAliases") == 0) {
 		this->aliasManager->printAliases();
@@ -38,8 +42,6 @@ void SystemCommandManager::execute(string command) {
 		cout << MAX_COMMAND_LENGTH << endl;
 		cerr << "\33[0;1;31m" << "MAX_VARIABLE_LENGTH: " << "\33[0m";
 		cout << MAX_VARIABLE_LENGTH << endl;
-		cerr << "\33[0;1;31m" << "MAX_NUMBER_DIGITS: " << "\33[0m";
-		cout << MAX_NUMBER_DIGITS << endl;
 		cerr << "\33[0;1;31m" << "MAX_NUMBER: " << "\33[0m";
 		cout << MAX_NUMBER << endl;
 	}
@@ -56,6 +58,7 @@ void SystemCommandManager::execute(string command) {
 		cout << "\33[0;1;33m" << ":let <variable> <term>" << "\33[0m" << " - Binds <term> to <variable>" << endl;
 		cout << "\33[0;1;33m" << ":debug ON/OFF" << "\33[0m" << " - Prints messages while executing for debugging" << endl;
 		cout << "\33[0;1;33m" << ":time ON/OFF" << "\33[0m" << " - Prints the execution time of each command" << endl;
+		cout << "\33[0;1;33m" << ":pure ON/OFF" << "\33[0m" << " - Prints the pure form of the command given" << endl;
 		cout << "\33[0;1;33m" << ":help" << "\33[0m" << " - Display all possible commands" << endl;
 	}
 	else if (command.substr(1, 3).compare("let") == 0) {
@@ -69,6 +72,16 @@ void SystemCommandManager::execute(string command) {
 			term.push_back(command[index++]);
 
 		this->aliasManager->addAlias(term, variable);
+	}
+	else if (command.substr(1, 4).compare("pure") == 0) {
+		string flag;
+		flag.push_back(command[6]);
+		flag.push_back(command[7]);
+
+		if (flag.compare("ON") == 0)
+			PURE_TERM = true;
+		else if (flag.compare("OF") == 0)
+			PURE_TERM = false;
 	}
 	else if (command.substr(1, 5).compare("trace") == 0) {
 		string flag;
