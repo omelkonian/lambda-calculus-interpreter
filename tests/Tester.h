@@ -17,40 +17,16 @@ public:
 	Tester();
 	virtual ~Tester();
 
-	// SCANNER
-	void testScannerRT();
-
 	// PARSER
-	void testParserRT();
-	void testParser();
-
-	// CALCULATOR
-	void testCalculator();
-
-	// EVALUATOR
-	void testEvaluatorRT();
-	void testEvaluator();
-
-	// ERROR-CHECKING
-	void testScannerErrorsRT();
 	void testParserErrors();
 
-	// AUTO-CORRECTING
-	void testAutocorrectorRT();
-
-	// TREE OPERATIONS
-	void testAST();
-	void testVariablePool();
-
-	// STRING OPERATIONS
-	void testStringManipulation();
+	// EVALUATOR
+	void testEvaluator();
 
 	// ALIAS MANAGER
 	void testAliasing();
 
 	// CHURCH ENCODING
-	void testEnchurch();
-	void testDechurch();
 	void testNumericOperations();
 
 	// LIST

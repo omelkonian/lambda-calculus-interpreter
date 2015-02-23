@@ -41,36 +41,14 @@ int main() {
 
 	clock_t begin_time;
 
-	bool runTest = false;
+	bool runTests = false;
 
-	if (runTest) {
+	if (runTests) {
 		Tester *tester = new Tester();
-//		tester->testScannerErrorsRT();
-//		tester->testScannerRT();
-//		tester->testParserRT();
-//		tester->testParser();
-//		tester->testAST();
-//		tester->testParserErrors();
-//		tester->testAutocorrectorRT();
-//		tester->testEvaluatorRT();
-//		tester->testEvaluator();
-//		tester->testVariablePool();
-//		tester->testStringManipulation();
-//		tester->testAliasing();
-//		tester->testEnchurch();
-//		tester->testDechurch();
-//		tester->testNumericOperations();
-//		tester->testListChecker();
-//		tester->testTermConstruction();
-//		tester->testPrintList();
-
-//		tester->globalTest();
-
+		tester->globalTest();
 		delete tester;
 		cout << "------------ALL TESTS PASSED----------" << endl;
-
 		return 0;
-		exit(0);
 	}
 
 	AliasManager *aliasManager = new AliasManager();
@@ -90,10 +68,6 @@ int main() {
 			linenoiseHistoryAdd(command); /* Add to the history. */
 			linenoiseHistorySave("history.txt"); /* Save the history on disk. */
 		}
-		if (strcmp(command, "quit") == 0) {
-			free(command);
-			break;
-		}
 
 		string comStr = command;
 
@@ -101,7 +75,6 @@ int main() {
 			systemCommandManager->execute(comStr);
 		else {
 			begin_time = clock();
-
 
 			string copy = comStr;
 
