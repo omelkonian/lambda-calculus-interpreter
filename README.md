@@ -2,7 +2,7 @@ A C++ interpreter for the λ-calculus, a formal system that is computationally e
 
 Setup
 
-1. cd to /Debug/
+1. cd to /Debug/ for Unix (or /Debug(Windows)/ to compile on Windows)
 
 2. make all
 
